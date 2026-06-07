@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Dashboard</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="sidebar.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main-col">
+      <div id="headerContainer"></div>
+
+      <div class="main-scroll">
+
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
+          <div>
+            <h1 style="font-size:20px;font-weight:800;color:#111827;" id="welcomeMsg">Welcome back! 👋</h1>
+            <p style="color:#6B7280;font-size:13px;margin-top:2px;">Here's what's happening today.</p>
+          </div>
+          <button onclick="window.location.href='leads.html'" style="background:#6C3EF4;color:white;border:none;padding:10px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(108,62,244,0.3);">+ Add Lead</button>
+        </div>
+
+        <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+          <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+              <span style="font-size:12px;color:#6B7280;font-weight:500;">Total Leads</span>
+            </div>
+            <div id="totalLeads" style="font-size:28px;font-weight:800;color:#111827;">—</div>
+            <div style="color:#16A34A;font-size:11px;font-weight:600;margin-top:4px;">↑ from last month</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+              <span style="font-size:12px;color:#6B7280;font-weight:500;">Follow Ups</span>
+            </div>
+            <div id="totalFollowups" style="font-size:28px;font-weight:800;color:#111827;">—</div>
+            <div style="color:#16A34A;font-size:11px;font-weight:600;margin-top:4px;">↑ today</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg></div>
+              <span style="font-size:12px;color:#6B7280;font-weight:500;">Meetings</span>
+            </div>
+            <div id="totalMeetings" style="font-size:28px;font-weight:800;color:#111827;">—</div>
+            <div style="color:#16A34A;font-size:11px;font-weight:600;margin-top:4px;">↑ today</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+              <div style="width:38px;height:38px;border-radius:10px;background:#D1FAE5;display:flex;align-items:center;justify-content:center;flex-shrink:0;"><svg width="18" height="18" fill="none" stroke="#059669" stroke-width="2" viewBox="0 0 24 24"><polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg></div>
+              <span style="font-size:12px;color:#6B7280;font-weight:500;">Converted</span>
+            </div>
+            <div id="totalConverted" style="font-size:28px;font-weight:800;color:#111827;">—</div>
+            <div style="color:#16A34A;font-size:11px;font-weight:600;margin-top:4px;">↑ from last month</div>
+          </div>
+        </div>
+
+        <div style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid #F3F4F6;">
+            <h2 style="font-weight:700;color:#111827;font-size:15px;">Recent Leads</h2>
+            <a href="leads.html" style="font-size:12px;font-weight:600;color:#6C3EF4;border:1px solid #DDD6FE;padding:5px 12px;border-radius:8px;text-decoration:none;">View All</a>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:480px;">
+              <thead style="background:#F9FAFB;">
+                <tr>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:#6B7280;font-weight:600;">NAME</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">PHONE</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;">SOURCE</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;">STATUS</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">DATE</th>
+                </tr>
+              </thead>
+              <tbody id="leadsTableBody">
+                <tr><td colspan="5" style="text-align:center;padding:30px;color:#9CA3AF;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <script>
+    injectCommonStyles();
+    renderSidebar('Dashboard');
+    document.getElementById('headerContainer').innerHTML = renderHeader('Dashboard',
+      `<button onclick="window.location.href='leads.html'" style="background:#6C3EF4;color:white;border:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">+ Add Lead</button>`
+    );
+
+    const token = localStorage.getItem('token');
+    const user  = JSON.parse(localStorage.getItem('user')||'{}');
+    if (!token) window.location.href = 'login.html';
+    if (user.name) document.getElementById('welcomeMsg').textContent = `Welcome back, ${user.name}! 👋`;
+
+    const colors = ['#6C3EF4','#EC4899','#0EA5E9','#10B981','#F59E0B','#EF4444'];
+    function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    function getColor(n){return colors[n.charCodeAt(0)%colors.length];}
+
+    function fixGrid(){
+      const g=document.getElementById('statsGrid');
+      if(window.innerWidth<640) {
+        g.style.gridTemplateColumns='1fr 1fr';
+        // Mobile layout scroll backup fix
+        document.body.style.height = 'auto';
+        document.body.style.overflow = 'auto';
+      }
+      else if(window.innerWidth<900) {
+        g.style.gridTemplateColumns='repeat(2,1fr)';
+      }
+      else {
+        g.style.gridTemplateColumns='repeat(4,1fr)';
+        document.body.style.height = '100%';
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    fixGrid(); window.addEventListener('resize',fixGrid);
+
+    async function loadStats() {
+      try {
+        const res = await fetch('http://localhost:5000/api/leads/stats', { 
+          headers:{'Authorization':`Bearer ${token}`} 
+        });
+        const data = await res.json();
+        
+        if (data && data.success && data.stats) {
+          if(document.getElementById('totalLeads')) document.getElementById('totalLeads').textContent = data.stats.total ?? 0;
+          if(document.getElementById('totalFollowups')) document.getElementById('totalFollowups').textContent = data.stats.followups ?? 0;
+          if(document.getElementById('totalMeetings')) document.getElementById('totalMeetings').textContent = data.stats.meetings ?? 0;
+          if(document.getElementById('totalConverted')) document.getElementById('totalConverted').textContent = data.stats.converted ?? 0;
+          return;
+        }
+      } catch(e) {
+        console.log("Dashboard stats fetch failed, trying dynamic backup...", e);
+      }
+
+      try {
+        const resLeads = await fetch('http://localhost:5000/api/leads?limit=1000', { 
+          headers:{'Authorization':`Bearer ${token}`} 
+        });
+        const dataLeads = await resLeads.json();
+        
+        const resMeetings = await fetch('http://localhost:5000/api/meetings', {
+          headers:{'Authorization':`Bearer ${token}`}
+        });
+        const dataMeetings = await resMeetings.json();
+        
+        let totalMeetingsCount = 0;
+        if (dataMeetings && dataMeetings.success && dataMeetings.data) {
+          totalMeetingsCount = dataMeetings.data.length;
+        }
+        
+        if (dataLeads && dataLeads.success && dataLeads.data) {
+          const allLeads = dataLeads.data;
+          const total = dataLeads.pagination?.total || allLeads.length;
+          const converted = allLeads.filter(l => l.status === 'Converted').length;
+          const followups = allLeads.filter(l => l.status === 'Follow Up').length;
+          
+          if(document.getElementById('totalLeads')) document.getElementById('totalLeads').textContent = total;
+          if(document.getElementById('totalFollowups')) document.getElementById('totalFollowups').textContent = followups;
+          if(document.getElementById('totalMeetings')) document.getElementById('totalMeetings').textContent = totalMeetingsCount; 
+          if(document.getElementById('totalConverted')) document.getElementById('totalConverted').textContent = converted;
+        }
+      } catch (err) {
+        if(document.getElementById('totalLeads')) document.getElementById('totalLeads').textContent = "0";
+        if(document.getElementById('totalFollowups')) document.getElementById('totalFollowups').textContent = "0";
+        if(document.getElementById('totalMeetings')) document.getElementById('totalMeetings').textContent = "0";
+        if(document.getElementById('totalConverted')) document.getElementById('totalConverted').textContent = "0";
+      }
+    }
+
+    async function loadLeads(){
+      try{
+        const res=await fetch('http://localhost:5000/api/leads?limit=5',{headers:{'Authorization':`Bearer ${token}`}});
+        const data=await res.json();
+        const tbody=document.getElementById('leadsTableBody');
+        if(data.success&&data.data.length>0){
+          tbody.innerHTML=data.data.map(l=>`
+            <tr style="border-bottom:1px solid #F9FAFB;">
+              <td style="padding:10px 16px;"><div style="display:flex;align-items:center;gap:8px;"><div class="avatar" style="background:${getColor(l.name)}">${getInitials(l.name)}</div><span style="font-size:13px;font-weight:600;color:#1F2937;">${l.name}</span></div></td>
+              <td style="padding:10px 12px;font-size:13px;color:#6B7280;" class="hide-mobile">${l.phone}</td>
+              <td style="padding:10px 12px;"><span class="badge src-${l.source}">${l.source}</span></td>
+              <td style="padding:10px 12px;"><span class="badge badge-${l.status}">${l.status}</span></td>
+              <td style="padding:10px 12px;font-size:12px;color:#9CA3AF;" class="hide-mobile">${new Date(l.created_at).toLocaleDateString('en-IN')}</td>
+            </tr>`).join('');
+        } else {
+          tbody.innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#9CA3AF;">No Leads Found</td></tr>';
+        }
+      }catch(e){document.getElementById('leadsTableBody').innerHTML='<tr><td colspan="5" style="text-align:center;padding:30px;color:#EF4444;">Server error</td></tr>';}
+    }
+    loadStats(); loadLeads();
+  </script>
+</body>
+</html>

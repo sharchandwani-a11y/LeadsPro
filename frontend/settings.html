@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Settings</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="sidebar.js"></script>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main-col">
+      <div id="headerContainer"></div>
+
+      <div class="main-scroll">
+        <div style="max-width:620px;margin:0 auto;">
+
+          <!-- Profile Card -->
+          <div style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:20px;margin-bottom:16px;">
+            <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
+              <div id="avatarBig" style="width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,#6C3EF4,#4F46E5);display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:800;color:white;flex-shrink:0;">SR</div>
+              <div>
+                <h2 id="profileName" style="font-size:18px;font-weight:800;color:#111827;">Loading...</h2>
+                <p id="profileEmail" style="font-size:13px;color:#6B7280;margin-top:2px;"></p>
+                <span id="profileRole" style="font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;background:#EDE9FE;color:#6C3EF4;display:inline-block;margin-top:6px;"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Tabs -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;overflow-x:auto;padding-bottom:2px;">
+            <button onclick="showTab('profile')" id="tab_profile" style="background:#6C3EF4;color:white;border:none;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">👤 Profile</button>
+            <button onclick="showTab('password')" id="tab_password" style="background:#F3F4F6;color:#6B7280;border:none;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">🔐 Password</button>
+            <button onclick="showTab('danger')" id="tab_danger" style="background:#F3F4F6;color:#6B7280;border:none;padding:9px 16px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">⚠️ Danger</button>
+          </div>
+
+          <!-- Profile Tab -->
+          <div id="section_profile" style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:20px;">
+            <h3 style="font-weight:700;color:#111827;margin-bottom:16px;font-size:15px;"> Update Your Profile </h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div><label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">FULL NAME</label><input type="text" id="p_name" class="inp" placeholder="Enter your name "/></div>
+              <div><label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">EMAIL</label><input type="email" id="p_email" class="inp" placeholder="Enter your Email"/></div>
+              <div><label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">ROLE</label><input type="text" id="p_role" class="inp" disabled style="background:#F9FAFB;color:#9CA3AF;"/></div>
+              <button onclick="updateProfile()" style="background:#6C3EF4;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">💾 Save </button>
+            </div>
+          </div>
+
+          <!-- Password Tab -->
+          <div id="section_password" style="display:none;background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:20px;">
+            <h3 style="font-weight:700;color:#111827;margin-bottom:16px;font-size:15px;">Change Password</h3>
+            <div style="display:flex;flex-direction:column;gap:14px;">
+              <div><label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">OLD PASSWORD</label><input type="password" id="old_pass" class="inp" placeholder="Old password"/></div>
+              <div>
+                <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">NEW PASSWORD</label>
+                <input type="password" id="new_pass" class="inp" placeholder="Naya password (min 6)" oninput="checkStrength()"/>
+                <div style="display:flex;gap:3px;margin-top:6px;"><div id="str1" style="height:3px;flex:1;border-radius:2px;background:#E5E7EB;transition:background 0.3s;"></div><div id="str2" style="height:3px;flex:1;border-radius:2px;background:#E5E7EB;transition:background 0.3s;"></div><div id="str3" style="height:3px;flex:1;border-radius:2px;background:#E5E7EB;transition:background 0.3s;"></div><div id="str4" style="height:3px;flex:1;border-radius:2px;background:#E5E7EB;transition:background 0.3s;"></div></div>
+                <p id="strText" style="font-size:11px;color:#9CA3AF;margin-top:3px;"></p>
+              </div>
+              <div><label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">CONFIRM PASSWORD</label><input type="password" id="confirm_pass" class="inp" placeholder="Enter Password Again"/></div>
+              <button onclick="changePassword()" style="background:#6C3EF4;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;">🔐 Change </button>
+            </div>
+          </div>
+
+          <!-- Danger Tab -->
+          <div id="section_danger" style="display:none;background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:20px;">
+            <h3 style="font-weight:700;color:#EF4444;margin-bottom:16px;font-size:15px;">⚠️ Danger Zone</h3>
+            <div style="border:1.5px solid #FEE2E2;border-radius:12px;padding:16px;margin-bottom:12px;">
+              <h4 style="font-weight:700;color:#111827;margin-bottom:4px;font-size:14px;">Logout All Devices</h4>
+              <p style="font-size:12px;color:#6B7280;margin-bottom:12px;">You will be logged out from all devices.</p>
+              <button onclick="logoutAll()" style="background:#FEE2E2;color:#EF4444;border:none;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">🚪 Logout All</button>
+            </div>
+            <div style="border:1.5px solid #FEE2E2;border-radius:12px;padding:16px;">
+              <h4 style="font-weight:700;color:#EF4444;margin-bottom:4px;font-size:14px;">Account Delete</h4>
+              <p style="font-size:12px;color:#6B7280;margin-bottom:12px;">Everything will be deleted permanently!</p>
+              <button onclick="confirmDelete()" style="background:#EF4444;color:white;border:none;padding:10px 18px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;">🗑️ Delete Account</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    injectCommonStyles();
+    renderSidebar('Settings');
+    document.getElementById('headerContainer').innerHTML = renderHeader('⚙️ Settings');
+
+    const token = localStorage.getItem('token');
+    const user  = JSON.parse(localStorage.getItem('user')||'{}');
+    if (!token) window.location.href = 'login.html';
+
+    function loadProfile(){
+      const name=user.name||'';const email=user.email||'';const role=user.role||'';
+      document.getElementById('profileName').textContent=name;
+      document.getElementById('profileEmail').textContent=email;
+      document.getElementById('profileRole').textContent=role.toUpperCase();
+      document.getElementById('avatarBig').textContent=name.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);
+      document.getElementById('p_name').value=name;
+      document.getElementById('p_email').value=email;
+      document.getElementById('p_role').value=role.charAt(0).toUpperCase()+role.slice(1);
+    }
+
+    function showTab(tab){
+      ['profile','password','danger'].forEach(t=>{
+        document.getElementById(`section_${t}`).style.display=t===tab?'block':'none';
+        const btn=document.getElementById(`tab_${t}`);
+        btn.style.background=t===tab?'#6C3EF4':'#F3F4F6';
+        btn.style.color=t===tab?'white':'#6B7280';
+      });
+    }
+
+    function checkStrength(){
+      const pass=document.getElementById('new_pass').value;
+      const rules=[pass.length>=6,/[A-Z]/.test(pass),/[0-9]/.test(pass),/[!@#$%^&*]/.test(pass)];
+      const score=rules.filter(Boolean).length;
+      const colors=['#EF4444','#F59E0B','#3B82F6','#10B981'];
+      const labels=['Weak','Medium','Strong','Very Strong'];
+      for(let i=1;i<=4;i++) document.getElementById(`str${i}`).style.background=i<=score?colors[score-1]:'#E5E7EB';
+      const txt=document.getElementById('strText');txt.textContent=score>0?labels[score-1]:'';txt.style.color=score>0?colors[score-1]:'#9CA3AF';
+    }
+
+    async function updateProfile(){
+      const name=document.getElementById('p_name').value.trim();const email=document.getElementById('p_email').value.trim();
+      if(!name||!email){showToast('⚠️ Name and email required!','err');return;}
+      try{const res=await fetch('http://localhost:5000/api/auth/profile',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({name,email})});const data=await res.json();if(data.success){localStorage.setItem('user',JSON.stringify({...user,name,email}));showToast('✅ Profile update ho gaya!','ok');loadProfile();}else showToast('❌ '+data.message,'err');}
+      catch(e){localStorage.setItem('user',JSON.stringify({...user,name,email}));showToast('✅ Profile updated Successfully!','ok');loadProfile();}
+    }
+
+    async function changePassword(){
+      const oldPass=document.getElementById('old_pass').value;const newPass=document.getElementById('new_pass').value;const confirmPass=document.getElementById('confirm_pass').value;
+      if(!oldPass){showToast('⚠️ Please enter your old password!','err');return;}
+      if(newPass.length<6){showToast('⚠️ Min 6 characters!','err');return;}
+      if(newPass!==confirmPass){showToast('⚠️ The entered passwords are not the same!','err');return;}
+      try{const res=await fetch('http://localhost:5000/api/auth/change-password',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({oldPassword:oldPass,newPassword:newPass})});const data=await res.json();if(data.success){showToast('✅ Password change ho gaya!','ok');setTimeout(()=>{localStorage.clear();window.location.href='login.html';},2000);}else showToast('❌ '+data.message,'err');}
+      catch(e){showToast('❌ Server error','err');}
+    }
+
+    function logoutAll(){if(confirm('Do you want to LOGOUT?')){localStorage.clear();window.location.href='login.html';}}
+    function confirmDelete(){const i=prompt('Enter DELETE to permanently delete your account:');if(i==='DELETE'){showToast('Account delete request!','ok');setTimeout(()=>{localStorage.clear();window.location.href='login.html';},2000);}else showToast('❌ Cancel!','err');}
+
+    loadProfile();
+  </script>
+</body>
+</html>

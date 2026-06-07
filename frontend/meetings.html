@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Meetings</title>
+  <link rel="icon" type="image/png" href="logo.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="sidebar.js"></script>
+  <style>
+    .cal-day{width:100%;aspect-ratio:1;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer;transition:all 0.2s;position:relative;}
+    .cal-day:hover{background:#EDE9FE;color:#6C3EF4;}
+    .cal-day.today{background:#6C3EF4;color:white;font-weight:700;}
+    .cal-day.selected{background:#4F46E5;color:white;font-weight:700;}
+    .cal-day.has-meeting::after{content:'';position:absolute;bottom:4px;left:50%;transform:translateX(-50%);width:4px;height:4px;border-radius:50%;background:#6C3EF4;}
+    .cal-day.today.has-meeting::after{background:white;}
+    .cal-day.selected.has-meeting::after{background:white;}
+    .cal-day.other-month{color:#D1D5DB;cursor:default;}
+    .cal-day.other-month:hover{background:none;color:#D1D5DB;}
+    .time-slot{padding:7px 4px;border-radius:7px;border:1.5px solid #E5E7EB;font-size:12px;cursor:pointer;transition:all 0.2s;text-align:center;}
+    .time-slot:hover{border-color:#6C3EF4;color:#6C3EF4;background:#EDE9FE;}
+    .time-slot.selected{background:#6C3EF4;color:white;border-color:#6C3EF4;}
+    .time-slot.booked{background:#FEE2E2;color:#EF4444;border-color:#FECACA;cursor:not-allowed;}
+    .meeting-card{background:white;border-radius:12px;padding:14px;border-left:4px solid #6C3EF4;margin-bottom:10px;box-shadow:0 1px 4px rgba(0,0,0,0.05);}
+    .platform-btn{border:1.5px solid #E5E7EB;border-radius:10px;padding:8px;text-align:center;cursor:pointer;transition:all 0.2s;}
+    .platform-btn.active{border-color:#6C3EF4;background:#F5F3FF;}
+    @media(min-width:900px){#mainGrid{grid-template-columns:340px 1fr !important;grid-template-rows:auto auto;}#mainGrid>div:last-child{grid-column:2;grid-row:1/span 2;}}
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+
+    <div class="main-col">
+      <div id="headerContainer"></div>
+
+      <div class="main-scroll">
+        <div id="mainGrid" style="display:grid;grid-template-columns:1fr;gap:16px;">
+
+          <div style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <button onclick="prevMonth()" style="background:#F3F4F6;border:none;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;">‹</button>
+              <h3 id="calMonthYear" style="font-weight:800;color:#111827;font-size:15px;"></h3>
+              <button onclick="nextMonth()" style="background:#F3F4F6;border:none;width:30px;height:30px;border-radius:8px;cursor:pointer;font-size:16px;">›</button>
+            </div>
+            
+            <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;margin-bottom:6px;">
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">S</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">M</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">T</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">W</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">T</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">F</div>
+              <div style="text-align:center;font-size:11px;font-weight:600;color:#9CA3AF;padding:4px 0;">S</div>
+            </div>
+            
+            <div id="calGrid" style="display:grid;grid-template-columns:repeat(7,1fr);gap:2px;"></div>
+          </div>
+
+          <div style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:16px;">
+            <h3 id="selectedDateTitle" style="font-weight:700;color:#111827;margin-bottom:12px;font-size:14px;">Today's Meetings</h3>
+            <div id="selectedDateMeetings"><p style="color:#9CA3AF;font-size:13px;text-align:center;padding:16px 0;">There is no meeting scheduled!</p></div>
+          </div>
+
+          <div style="background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.06);padding:16px;">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px;">
+              <h2 style="font-weight:700;color:#111827;font-size:15px;">All Meetings</h2>
+              <span id="meetingsCount" style="background:#EDE9FE;color:#6C3EF4;font-size:12px;font-weight:600;padding:3px 10px;border-radius:20px;"></span>
+            </div>
+            <div id="meetingsList"><p style="color:#9CA3AF;text-align:center;padding:30px 0;">Loading...</p></div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal" class="modal-bg" style="display:none;">
+    <div style="background:white;border-radius:20px;width:100%;max-width:520px;overflow:hidden;max-height:92vh;overflow-y:auto;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1px solid #F3F4F6;position:sticky;top:0;background:white;z-index:1;">
+        <h3 style="font-weight:800;color:#111827;font-size:17px;">📅 Schedule Meeting</h3>
+        <button onclick="closeModal()" style="background:none;border:none;cursor:pointer;color:#9CA3AF;font-size:20px;">✕</button>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">👤 CLIENT *</label>
+          <select id="m_lead" class="inp"><option value="">-- Select Client --</option></select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">👔 ASSIGN TO *</label>
+          <select id="m_assigned" class="inp"><option value="">-- Select Team member --</option></select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">📝 TITLE *</label>
+          <input type="text" id="m_title" class="inp" placeholder="Meeting's Topic..." oninput="updateSummary()"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">📅 DATE *</label>
+          <input type="date" id="m_date" class="inp" onchange="updateTimeSlots()"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:6px;">🕐 TIME *</label>
+          <div id="timeSlots" style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;">
+            <p style="color:#9CA3AF;font-size:12px;grid-column:span 4;text-align:center;padding:8px 0;">Select Date First</p>
+          </div>
+          <input type="hidden" id="m_time"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:6px;">💻 PLATFORM</label>
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;">
+            <div class="platform-btn active" onclick="selectPlatform('Zoom')" id="plat_Zoom"><div style="font-size:18px;">💻</div><div style="font-size:10px;font-weight:600;color:#374151;margin-top:3px;">Zoom</div></div>
+            <div class="platform-btn" onclick="selectPlatform('Google Meet')" id="plat_Google Meet"><div style="font-size:18px;">🎥</div><div style="font-size:10px;font-weight:600;color:#374151;margin-top:3px;">Meet</div></div>
+            <div class="platform-btn" onclick="selectPlatform('In Person')" id="plat_In Person"><div style="font-size:18px;">🤝</div><div style="font-size:10px;font-weight:600;color:#374151;margin-top:3px;">In Person</div></div>
+            <div class="platform-btn" onclick="selectPlatform('Phone Call')" id="plat_Phone Call"><div style="font-size:18px;">📞</div><div style="font-size:10px;font-weight:600;color:#374151;margin-top:3px;">Phone</div></div>
+          </div>
+          <input type="hidden" id="m_platform" value="Zoom"/>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">📋 NOTES</label>
+          <textarea id="m_notes" class="inp" rows="2" placeholder="Notes..."></textarea>
+        </div>
+        <div id="meetingSummary" style="background:#F5F3FF;border:1.5px solid #DDD6FE;border-radius:10px;padding:12px;display:none;">
+          <p style="font-size:12px;font-weight:700;color:#6C3EF4;margin-bottom:4px;">📋 Summary</p>
+          <p id="summaryText" style="font-size:12px;color:#374151;line-height:1.6;"></p>
+        </div>
+      </div>
+      <div style="padding:0 20px 20px;display:flex;gap:10px;position:sticky;bottom:0;background:white;">
+        <button onclick="closeModal()" style="flex:1;border:1.5px solid #E5E7EB;background:white;color:#374151;font-weight:600;font-size:14px;padding:11px;border-radius:10px;cursor:pointer;">Cancel</button>
+        <button onclick="saveMeeting()" style="flex:1;background:#6C3EF4;color:white;font-weight:700;font-size:14px;padding:11px;border-radius:10px;border:none;cursor:pointer;">📅 Schedule</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    injectCommonStyles();
+    renderSidebar('Meetings');
+    
+    document.getElementById('headerContainer').innerHTML = renderHeader('📅 Meetings',
+      `<button onclick="openModal()" style="background:#6C3EF4;color:white;border:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;">+ Schedule</button>`
+    );
+
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+
+    const today=new Date(); 
+    let currentMonth=today.getMonth(), currentYear=today.getFullYear();
+    let selectedDate=today.toISOString().split('T')[0];
+    let allMeetings=[], selectedPlatform='Zoom';
+    
+    const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const pColors={'Zoom':'#2563EB','Google Meet':'#059669','In Person':'#D97706','Phone Call':'#7C3AED'};
+
+    function renderCalendar(){
+      document.getElementById('calMonthYear').textContent=`${months[currentMonth]} ${currentYear}`;
+      const grid=document.getElementById('calGrid');
+      const firstDay=new Date(currentYear,currentMonth,1).getDay();
+      const daysInMonth=new Date(currentYear,currentMonth+1,0).getDate();
+      const daysInPrev=new Date(currentYear,currentMonth,0).getDate();
+      
+      let html='';
+      for(let i=firstDay-1;i>=0;i--) html+=`<div class="cal-day other-month">${daysInPrev-i}</div>`;
+      
+      for(let d=1; d<=daysInMonth; d++){
+        const currentDayStr = `${currentYear}-${String(currentMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+        const isToday = currentDayStr === today.toISOString().split('T')[0];
+        const isSel = currentDayStr === selectedDate;
+        
+        const hasM = allMeetings.some(m => {
+          if (!m.meeting_date) return false;
+          const cleanMDate = m.meeting_date.includes('T') ? m.meeting_date.split('T')[0] : m.meeting_date.substring(0, 10).trim();
+          return cleanMDate === currentDayStr;
+        });
+        
+        let cls='cal-day';
+        if(isToday) cls+=' today';
+        else if(isSel) cls+=' selected';
+        
+        if(hasM) cls+=' has-meeting';
+        html+=`<div class="${cls}" onclick="selectDate('${currentDayStr}')">${d}</div>`;
+      }
+      
+      const total=Math.ceil((firstDay+daysInMonth)/7)*7;
+      for(let d=1;d<=total-firstDay-daysInMonth;d++) html+=`<div class="cal-day other-month">${d}</div>`;
+      grid.innerHTML=html;
+    }
+
+    function prevMonth(){currentMonth--;if(currentMonth<0){currentMonth=11;currentYear--;}renderCalendar();}
+    function nextMonth(){currentMonth++;if(currentMonth>11){currentMonth=0;currentYear++;}renderCalendar();}
+
+    function selectDate(ds){selectedDate=ds;renderCalendar();showDateMeetings(ds);}
+
+    function showDateMeetings(ds){
+      const d=new Date(ds);
+      document.getElementById('selectedDateTitle').textContent=d.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});
+      const dayM=allMeetings.filter(m => {
+        if(!m.meeting_date) return false;
+        const mDateStr = m.meeting_date.includes('T') ? m.meeting_date.split('T')[0] : m.meeting_date.substring(0, 10).trim();
+        return mDateStr === ds;
+      });
+      const div=document.getElementById('selectedDateMeetings');
+      if(!dayM.length){div.innerHTML=`<div style="text-align:center;padding:16px 0;"><div style="font-size:28px;margin-bottom:6px;">📭</div><p style="color:#9CA3AF;font-size:13px;">No Meetings Scheduled</p><button onclick="openModalWithDate('${ds}')" style="margin-top:8px;background:#6C3EF4;color:white;border:none;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:600;cursor:pointer;">+ Schedule</button></div>`;}
+      else{div.innerHTML=dayM.map(m=>`<div style="background:#F9F8FF;border-radius:10px;padding:12px;margin-bottom:8px;border-left:3px solid ${pColors[m.platform]||'#6C3EF4'};"><div style="display:flex;justify-content:space-between;align-items:start;gap:8px;"><div><p style="font-weight:700;font-size:13px;color:#111827;">${m.title||'Meeting'}</p><p style="font-size:12px;color:#6B7280;margin-top:3px;">👤 ${m.lead_name||'—'}</p><p style="font-size:12px;color:#6B7280;">👔 ${m.assigned_to_name||'Unassigned'}</p><p style="font-size:12px;color:#9CA3AF;">🕐 ${m.meeting_time}</p></div><button onclick="deleteMeeting(${m.id})" style="background:#FEE2E2;color:#EF4444;border:none;padding:5px 8px;border-radius:6px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">Del</button></div></div>`).join('');}
+    }
+
+    async function loadMeetings(){
+      try{const res=await fetch('http://localhost:5000/api/meetings',{headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){allMeetings=data.data;document.getElementById('meetingsCount').textContent=`${allMeetings.length} total`;renderCalendar();showDateMeetings(selectedDate);renderAllMeetings();}}catch(e){console.error(e);}
+    }
+
+    function renderAllMeetings(){
+      const div=document.getElementById('meetingsList');
+      if(!allMeetings.length){div.innerHTML='<p style="color:#9CA3AF;text-align:center;padding:30px 0;">No Meetings Scheduled</p>';return;}
+      
+      const sorted=[...allMeetings].sort((a,b)=>new Date(`${a.meeting_date.split('T')[0]}T${a.meeting_time}`)-new Date(`${b.meeting_date.split('T')[0]}T${b.meeting_time}`));
+      const todayStr = today.toISOString().split('T')[0];
+
+      div.innerHTML=sorted.map(m=>{
+        if(!m.meeting_date) return '';
+        const mDateStr = m.meeting_date.includes('T') ? m.meeting_date.split('T')[0] : m.meeting_date.substring(0, 10).trim();
+        const mDate = new Date(mDateStr);
+        
+        const isPast = mDateStr < todayStr;
+        
+        return `<div class="meeting-card" style="border-left-color:${isPast?'#9CA3AF':pColors[m.platform]||'#6C3EF4'};opacity:${isPast?'0.6':'1'}">
+          <div style="display:flex;justify-content:space-between;align-items:start;gap:10px;">
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap;">
+                <span style="font-weight:700;font-size:14px;color:#111827;">${m.title||'Meeting'}</span>
+                <span style="font-size:10px;padding:2px 7px;border-radius:10px;font-weight:600;${isPast?'background:#F3F4F6;color:#9CA3AF;':'background:#D1FAE5;color:#065F46;'}">${isPast?'Past':'Upcoming'}</span>
+              </div>
+              <div style="background:#F9F8FF;border-radius:8px;padding:8px;margin-bottom:6px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                <div><p style="font-size:9px;color:#9CA3AF;font-weight:600;">CLIENT</p><p style="font-size:12px;font-weight:600;color:#111827;">👤 ${m.lead_name||'—'}</p></div>
+                <div><p style="font-size:9px;color:#9CA3AF;font-weight:600;">ASSIGNED TO</p><p style="font-size:12px;font-weight:600;color:#111827;">👔 ${m.assigned_to_name||'Unassigned'}</p></div>
+              </div>
+              <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                <span style="font-size:11px;color:#9CA3AF;">📅 ${isNaN(mDate.getTime()) ? mDateStr : mDate.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'})}</span>
+                <span style="font-size:11px;color:#9CA3AF;">🕐 ${m.meeting_time}</span>
+                <span style="font-size:10px;font-weight:600;padding:2px 7px;border-radius:8px;background:${pColors[m.platform]||'#6C3EF4'}15;color:${pColors[m.platform]||'#6C3EF4'}">${m.platform}</span>
+              </div>
+            </div>
+            <button onclick="deleteMeeting(${m.id})" style="background:#FEE2E2;color:#EF4444;border:none;padding:6px 10px;border-radius:7px;font-size:11px;font-weight:600;cursor:pointer;flex-shrink:0;">Del</button>
+          </div>
+        </div>`;
+      }).join('');
+    }
+
+    async function loadDropdowns(){
+      try{
+        const r1=await fetch('http://localhost:5000/api/leads?limit=100',{headers:{'Authorization':`Bearer ${token}`}});const d1=await r1.json();
+        if(d1.success) document.getElementById('m_lead').innerHTML='<option value="">-- Select Client --</option>'+d1.data.map(l=>`<option value="${l.id}">${l.name} — ${l.phone}</option>`).join('');
+        const r2=await fetch('http://localhost:5000/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});const d2=await r2.json();
+        if(d2.success) document.getElementById('m_assigned').innerHTML='<option value="">--Select Team member --</option>'+d2.data.map(u=>`<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
+      }catch(e){console.error(e);}
+    }
+
+    function updateTimeSlots(){
+      const date=document.getElementById('m_date').value;if(!date)return;
+      const booked=allMeetings.filter(m=>{
+        if(!m.meeting_date) return false;
+        return (m.meeting_date.includes('T') ? m.meeting_date.split('T')[0] : m.meeting_date.substring(0, 10).trim()) === date;
+      }).map(m=>m.meeting_time.slice(0,5));
+      const slots=[];for(let h=9;h<=18;h++){slots.push(`${String(h).padStart(2,'0')}:00`);if(h<18)slots.push(`${String(h).padStart(2,'0')}:30`);}
+      document.getElementById('timeSlots').innerHTML=slots.map(t=>{const b=booked.includes(t);return `<div class="time-slot ${b?'booked':''}" onclick="${b?'':` selectTime('${t}')`}" id="slot_${t.replace(':','_')}">${t}${b?' 🚫':''}</div>`;}).join('');
+      document.getElementById('m_time').value='';updateSummary();
+    }
+
+    function selectTime(t){document.querySelectorAll('.time-slot').forEach(s=>s.classList.remove('selected'));const s=document.getElementById(`slot_${t.replace(':','_')}`);if(s)s.classList.add('selected');document.getElementById('m_time').value=t;updateSummary();}
+
+    function selectPlatform(p){
+      selectedPlatform=p;document.getElementById('m_platform').value=p;
+      ['Zoom','Google Meet','In Person','Phone Call'].forEach(pl=>{const el=document.getElementById(`plat_${pl}`);if(el)el.className=`platform-btn${pl===p?' active':''}`;});
+      updateSummary();
+    }
+
+    function updateSummary(){
+      const date=document.getElementById('m_date').value;const time=document.getElementById('m_time').value;const title=document.getElementById('m_title').value||'Meeting';
+      const ls=document.getElementById('m_lead');const as=document.getElementById('m_assigned');
+      const ln=ls.options[ls.selectedIndex]?.text||'';const an=as.options[as.selectedIndex]?.text||'';
+      const sd=document.getElementById('meetingSummary');
+      if(date&&time){sd.style.display='block';const d=new Date(date).toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long'});document.getElementById('summaryText').innerHTML=`<strong>${title}</strong><br>👤 ${ln||'—'}<br>👔 ${an||'—'}<br>📅 ${d} 🕐 ${time} via ${selectedPlatform}`;}
+      else sd.style.display='none';
+    }
+
+    function openModal(){loadDropdowns();document.getElementById('m_date').min=today.toISOString().split('T')[0];document.getElementById('m_date').value='';document.getElementById('m_time').value='';document.getElementById('m_title').value='';document.getElementById('m_notes').value='';document.getElementById('timeSlots').innerHTML='<p style="color:#9CA3AF;font-size:12px;grid-column:span 4;text-align:center;padding:8px 0;">Select Date First</p>';document.getElementById('meetingSummary').style.display='none';selectPlatform('Zoom');document.getElementById('modal').style.display='flex';}
+    function openModalWithDate(ds){openModal();setTimeout(()=>{document.getElementById('m_date').value=ds;updateTimeSlots();},150);}
+    function closeModal(){document.getElementById('modal').style.display='none';}
+
+    async function saveMeeting(){
+      const lead_id=document.getElementById('m_lead').value;const assigned_to=document.getElementById('m_assigned').value;const title=document.getElementById('m_title').value.trim();const meeting_date=document.getElementById('m_date').value;const meeting_time=document.getElementById('m_time').value;const platform=document.getElementById('m_platform').value;const notes=document.getElementById('m_notes').value.trim();
+      if(!lead_id){showToast('⚠️ Select Client!','err');return;}if(!assigned_to){showToast('⚠️ Assign Team member!','err');return;}if(!title){showToast('⚠️ Enter Title!','err');return;}if(!meeting_date){showToast('⚠️ Select Date!','err');return;}if(!meeting_time){showToast('⚠️ Select Time!','err');return;}
+      try{const res=await fetch('http://localhost:5000/api/meetings',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,assigned_to,title,meeting_date,meeting_time,platform,notes})});const data=await res.json();if(data.success){showToast('✅ Meeting scheduled!','ok');closeModal();loadMeetings();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+    }
+
+    async function deleteMeeting(id){
+      if(!confirm('Do you really want to Delete?'))return;
+      try{const res=await fetch(`http://localhost:5000/api/meetings/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadMeetings();}}catch(e){showToast('❌ Server error','err');}
+    }
+
+    loadMeetings();
+  </script>
+</body>
+</html>

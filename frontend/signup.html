@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Sign Up</title>
+<link rel="icon" type="image/jpeg" href="logo.jpeg"/>
+ <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <style>
+    *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;}
+    body{background:#0f0a1e;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow-x:hidden;position:relative;}
+    .blob{position:absolute;border-radius:50%;filter:blur(80px);opacity:0.3;animation:float 8s ease-in-out infinite;}
+    @keyframes float{0%,100%{transform:translate(0,0)}50%{transform:translate(20px,-20px)}}
+    .card{background:rgba(255,255,255,0.05);backdrop-filter:blur(20px);border:1px solid rgba(255,255,255,0.1);border-radius:20px;width:100%;max-width:480px;padding:32px;margin:16px;}
+    .inp{background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:white;width:100%;padding:11px 16px 11px 42px;font-size:14px;outline:none;transition:all 0.2s;font-family:'Plus Jakarta Sans',sans-serif;}
+    .inp:focus{border-color:#6C3EF4;background:rgba(108,62,244,0.1);}
+    .inp::placeholder{color:rgba(255,255,255,0.3);}
+    .inp-plain{padding:11px 16px;}
+    .btn{background:linear-gradient(135deg,#6C3EF4,#4F46E5);border-radius:10px;padding:14px;color:white;font-weight:700;width:100%;font-size:14px;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 8px 24px rgba(108,62,244,0.4);}
+    .btn:hover{transform:translateY(-2px);}
+    label{color:rgba(255,255,255,0.5);font-size:11px;font-weight:600;display:block;margin-bottom:6px;}
+    .step{display:none;}
+    .step.active{display:block;}
+    .plan-card{border:1.5px solid rgba(255,255,255,0.1);border-radius:12px;padding:16px;cursor:pointer;transition:all 0.2s;margin-bottom:10px;}
+    .plan-card:hover{border-color:#6C3EF4;background:rgba(108,62,244,0.1);}
+    .plan-card.selected{border-color:#6C3EF4;background:rgba(108,62,244,0.15);}
+    .toast{position:fixed;top:20px;right:20px;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;transform:translateX(150%);transition:transform 0.3s;z-index:999;}
+    .toast.show{transform:translateX(0);}
+    .toast.ok{background:rgba(16,185,129,0.2);border:1px solid rgba(16,185,129,0.3);color:#6EE7B7;}
+    .toast.err{background:rgba(239,68,68,0.2);border:1px solid rgba(239,68,68,0.3);color:#FCA5A5;}
+    .progress-bar{display:flex;gap:8px;margin-bottom:24px;}
+    .progress-step{flex:1;height:4px;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;}
+    .progress-step.done{background:#6C3EF4;}
+  </style>
+</head>
+<body>
+  <div class="blob" style="width:400px;height:400px;background:#6C3EF4;top:-100px;left:-100px;"></div>
+  <div class="blob" style="width:300px;height:300px;background:#EC4899;bottom:-80px;right:-80px;animation-delay:3s;"></div>
+  <div id="toast" class="toast"></div>
+
+  <div class="card">
+    <!-- Logo -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <img src="logo.jpeg" style="width:52px;height:52px;border-radius:12px;object-fit:cover;margin:0 auto 12px;display:block;" onerror="this.style.display='none'"/>
+      <h1 style="color:white;font-size:22px;font-weight:800;">LeadsPro CRM</h1>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px;">14 Days Free Trial — No credit card required</p>
+    </div>
+
+    <!-- Progress Bar -->
+    <div class="progress-bar">
+      <div class="progress-step done" id="prog1"></div>
+      <div class="progress-step" id="prog2"></div>
+      <div class="progress-step" id="prog3"></div>
+    </div>
+
+    <!-- STEP 1: Company Info -->
+    <div class="step active" id="step1">
+      <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Company Details</h2>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">Enter Your Company Details</p>
+
+      <div style="margin-bottom:14px;">
+        <label>COMPANY NAME *</label>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <input type="text" id="company_name" class="inp" placeholder="ABC Pvt Ltd"/>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label>OWNER EMAIL *</label>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+          <input type="email" id="company_email" class="inp" placeholder="owner@company.com"/>
+        </div>
+      </div>
+
+      <div style="margin-bottom:14px;">
+        <label>PHONE</label>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6z"/></svg>
+          <input type="tel" id="company_phone" class="inp" placeholder="9876543210"/>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label>INDUSTRY</label>
+         
+        <div style="position:relative;">
+           <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <input type="text" id="company_industry" class="inp" placeholder="Enter Industry"/>
+          <div style="margin-bottom:20px;"></div>
+        
+        </select>
+      </div>
+
+      <button class="btn" onclick="goStep2()">Next →</button>
+      <p style="text-align:center;color:rgba(255,255,255,0.3);font-size:12px;margin-top:16px;">
+        Already have an Account? <a href="login.html" style="color:#A78BFA;font-weight:600;">Login </a>
+      </p>
+    </div>
+
+    <!-- STEP 2: Password -->
+    <div class="step" id="step2">
+      <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Account Setup</h2>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">Set Strong Passward</p>
+
+      <div style="margin-bottom:14px;">
+        <label>PASSWORD *</label>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="password" class="inp" placeholder="Min 8 characters" oninput="checkPass()"/>
+        </div>
+        <div style="display:flex;gap:3px;margin-top:6px;">
+          <div id="p1" style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+          <div id="p2" style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+          <div id="p3" style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+          <div id="p4" style="height:3px;flex:1;border-radius:2px;background:rgba(255,255,255,0.1);transition:background 0.3s;"></div>
+        </div>
+      </div>
+
+      <div style="margin-bottom:20px;">
+        <label>CONFIRM PASSWORD *</label>
+        <div style="position:relative;">
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="confirm_password" class="inp" placeholder="Password dobara daalo"/>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;">
+        <button onclick="goStep1()" style="flex:1;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:white;font-weight:600;font-size:14px;padding:13px;border-radius:10px;cursor:pointer;">← Back</button>
+        <button class="btn" style="flex:2;" onclick="goStep3()">Next →</button>
+      </div>
+    </div>
+
+    <!-- STEP 3: Plan Select -->
+    <div class="step" id="step3">
+      <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Choose Plan </h2>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">14 Days Free Trial — Upgrade Later</p>
+
+      <div class="plan-card selected" onclick="selectPlan('trial', this)">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <p style="color:white;font-weight:700;font-size:15px;">🎁 Free Trial</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:3px;">14 days • 5 users • 500 leads</p>
+          </div>
+          <span style="color:#10B981;font-weight:800;font-size:16px;">FREE</span>
+        </div>
+      </div>
+
+      <div class="plan-card" onclick="selectPlan('basic', this)">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <p style="color:white;font-weight:700;font-size:15px;">⚡ Basic</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:3px;">10 users • 2000 leads • Email support</p>
+          </div>
+          <span style="color:#A78BFA;font-weight:800;font-size:16px;">₹999/mo</span>
+        </div>
+      </div>
+
+      <div class="plan-card" onclick="selectPlan('pro', this)">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div>
+            <p style="color:white;font-weight:700;font-size:15px;">🚀 Pro</p>
+            <p style="color:rgba(255,255,255,0.5);font-size:12px;margin-top:3px;">Unlimited users • Unlimited leads • Priority support</p>
+          </div>
+          <span style="color:#F59E0B;font-weight:800;font-size:16px;">₹2499/mo</span>
+        </div>
+      </div>
+
+      <input type="hidden" id="selected_plan" value="trial"/>
+
+      <div style="display:flex;gap:10px;margin-top:4px;">
+        <button onclick="goStep2()" style="flex:1;border:1.5px solid rgba(255,255,255,0.1);background:transparent;color:white;font-weight:600;font-size:14px;padding:13px;border-radius:10px;cursor:pointer;">← Back</button>
+        <button class="btn" style="flex:2;" onclick="submitSignup()">🚀 Start Free Trial</button>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    let currentStep = 1;
+    let selectedPlan = 'trial';
+
+    function showToast(msg, type) {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function updateProgress(step) {
+      for (let i = 1; i <= 3; i++) {
+        document.getElementById(`prog${i}`).classList.toggle('done', i <= step);
+      }
+    }
+
+    function goStep1() {
+      document.getElementById('step1').classList.add('active');
+      document.getElementById('step2').classList.remove('active');
+      updateProgress(1);
+    }
+
+    function goStep2() {
+      const name  = document.getElementById('company_name').value.trim();
+      const email = document.getElementById('company_email').value.trim();
+      if (!name || !email) { showToast('⚠️ Company Name and Email Required!', 'err'); return; }
+      if (!email.includes('@')) { showToast('⚠️Enter Valid Email !', 'err'); return; }
+
+      document.getElementById('step1').classList.remove('active');
+      document.getElementById('step2').classList.add('active');
+      updateProgress(2);
+    }
+
+    function goStep3() {
+      const pass    = document.getElementById('password').value;
+      const confirm = document.getElementById('confirm_password').value;
+      if (pass.length < 8) { showToast('⚠️ Password min 8 characters!', 'err'); return; }
+      if (pass !== confirm) { showToast('⚠️ Passwords didnot Match!', 'err'); return; }
+
+      document.getElementById('step2').classList.remove('active');
+      document.getElementById('step3').classList.add('active');
+      updateProgress(3);
+    }
+
+    function checkPass() {
+      const pass = document.getElementById('password').value;
+      const rules = [pass.length >= 8, /[A-Z]/.test(pass), /[0-9]/.test(pass), /[!@#$%^&*]/.test(pass)];
+      const score = rules.filter(Boolean).length;
+      const colors = ['#EF4444','#F59E0B','#3B82F6','#10B981'];
+      for (let i = 1; i <= 4; i++) {
+        document.getElementById(`p${i}`).style.background = i <= score ? colors[score-1] : 'rgba(255,255,255,0.1)';
+      }
+    }
+
+    function selectPlan(plan, el) {
+      selectedPlan = plan;
+      document.getElementById('selected_plan').value = plan;
+      document.querySelectorAll('.plan-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+
+    async function submitSignup() {
+      const company_name = document.getElementById('company_name').value.trim();
+      const email        = document.getElementById('company_email').value.trim();
+      const phone        = document.getElementById('company_phone').value.trim();
+      const industry     = document.getElementById('company_industry').value;
+      const password     = document.getElementById('password').value;
+      const plan         = document.getElementById('selected_plan').value;
+
+      const btn = document.querySelector('#step3 .btn');
+      btn.textContent = '⏳Creating Account ...';
+      btn.disabled = true;
+
+      try {
+        const res  = await fetch('http://localhost:5000/api/auth/signup', {
+          method:  'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body:    JSON.stringify({ company_name, email, phone, industry, password, plan })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user',  JSON.stringify(data.user));
+          showToast('✅ Account Created Succesfully!  Redirecting...', 'ok');
+          setTimeout(() => window.location.href = 'dashboard.html', 1500);
+        } else {
+          showToast('❌ ' + data.message, 'err');
+          btn.textContent = '🚀 Start Free Trial';
+          btn.disabled = false;
+        }
+      } catch(e) {
+        showToast('❌ Didnot Connected with Server', 'err');
+        btn.textContent = '🚀 Start Free Trial';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
