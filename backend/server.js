@@ -22,7 +22,7 @@ app.use('/api/followups', require('./routes/followups'));
 
 // Root — login page pe redirect
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'routes/frontend/login.html'));
+  res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
 // 404 handler
@@ -30,7 +30,7 @@ app.use((req, res, next) => {
   if (req.path.startsWith('/api')) {
     return res.status(404).json({ success: false, message: 'Route not found' });
   }
-  res.sendFile(path.join(__dirname, 'routes/frontend/login.html'));
+  res.sendFile(path.join(__dirname, '../frontend/login.html'));
 });
 
 // Error handler
