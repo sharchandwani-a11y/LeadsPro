@@ -127,7 +127,7 @@
 
     async function loadStats() {
       try {
-        const res = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/leads/stats', { 
+        const res = await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/leads/stats', { 
           headers:{'Authorization':`Bearer ${token}`} 
         });
         const data = await res.json();
@@ -144,12 +144,12 @@
       }
 
       try {
-        const resLeads = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/leads?limit=1000', { 
+        const resLeads = await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/leads?limit=1000', { 
           headers:{'Authorization':`Bearer ${token}`} 
         });
         const dataLeads = await resLeads.json();
         
-        const resMeetings = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/meetings', {
+        const resMeetings = await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/meetings', {
           headers:{'Authorization':`Bearer ${token}`}
         });
         const dataMeetings = await resMeetings.json();
@@ -180,7 +180,7 @@
 
     async function loadLeads(){
       try{
-        const res=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/leads?limit=5',{headers:{'Authorization':`Bearer ${token}`}});
+        const res=await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/leads?limit=5',{headers:{'Authorization':`Bearer ${token}`}});
         const data=await res.json();
         const tbody=document.getElementById('leadsTableBody');
         if(data.success&&data.data.length>0){

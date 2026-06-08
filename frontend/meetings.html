@@ -206,7 +206,7 @@
     }
 
     async function loadMeetings(){
-      try{const res=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/meetings',{headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){allMeetings=data.data;document.getElementById('meetingsCount').textContent=`${allMeetings.length} total`;renderCalendar();showDateMeetings(selectedDate);renderAllMeetings();}}catch(e){console.error(e);}
+      try{const res=await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/meetings',{headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){allMeetings=data.data;document.getElementById('meetingsCount').textContent=`${allMeetings.length} total`;renderCalendar();showDateMeetings(selectedDate);renderAllMeetings();}}catch(e){console.error(e);}
     }
 
     function renderAllMeetings(){
@@ -248,9 +248,9 @@
 
     async function loadDropdowns(){
       try{
-        const r1=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/leads?limit=100',{headers:{'Authorization':`Bearer ${token}`}});const d1=await r1.json();
+        const r1=await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/leads?limit=100',{headers:{'Authorization':`Bearer ${token}`}});const d1=await r1.json();
         if(d1.success) document.getElementById('m_lead').innerHTML='<option value="">-- Select Client --</option>'+d1.data.map(l=>`<option value="${l.id}">${l.name} — ${l.phone}</option>`).join('');
-        const r2=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});const d2=await r2.json();
+        const r2=await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});const d2=await r2.json();
         if(d2.success) document.getElementById('m_assigned').innerHTML='<option value="">--Select Team member --</option>'+d2.data.map(u=>`<option value="${u.id}">${u.name} (${u.role})</option>`).join('');
       }catch(e){console.error(e);}
     }
@@ -290,12 +290,12 @@
     async function saveMeeting(){
       const lead_id=document.getElementById('m_lead').value;const assigned_to=document.getElementById('m_assigned').value;const title=document.getElementById('m_title').value.trim();const meeting_date=document.getElementById('m_date').value;const meeting_time=document.getElementById('m_time').value;const platform=document.getElementById('m_platform').value;const notes=document.getElementById('m_notes').value.trim();
       if(!lead_id){showToast('⚠️ Select Client!','err');return;}if(!assigned_to){showToast('⚠️ Assign Team member!','err');return;}if(!title){showToast('⚠️ Enter Title!','err');return;}if(!meeting_date){showToast('⚠️ Select Date!','err');return;}if(!meeting_time){showToast('⚠️ Select Time!','err');return;}
-      try{const res=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/meetings',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,assigned_to,title,meeting_date,meeting_time,platform,notes})});const data=await res.json();if(data.success){showToast('✅ Meeting scheduled!','ok');closeModal();loadMeetings();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+      try{const res=await fetch('https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/meetings',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,assigned_to,title,meeting_date,meeting_time,platform,notes})});const data=await res.json();if(data.success){showToast('✅ Meeting scheduled!','ok');closeModal();loadMeetings();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
     }
 
     async function deleteMeeting(id){
       if(!confirm('Do you really want to Delete?'))return;
-      try{const res=await fetch(`http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/meetings/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadMeetings();}}catch(e){showToast('❌ Server error','err');}
+      try{const res=await fetch(`https://ofxfa7sc0j4lxwc212tc5uwn.187.127.132.57.sslip.io/api/meetings/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadMeetings();}}catch(e){showToast('❌ Server error','err');}
     }
 
     loadMeetings();
