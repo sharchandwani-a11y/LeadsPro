@@ -9,7 +9,7 @@ app.use(cors());
 app.use(express.json());
 
 // Frontend static files serve karo
-app.use(express.static(path.join(__dirname, '../frontend')));
+
 
 // DB connect
 require('./config/db');
@@ -22,15 +22,18 @@ app.use('/api/followups', require('./routes/followups'));
 
 // Root — login page pe redirect
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, '../frontend/login.html'));
+  res.json({
+    success: true,
+    message: 'LeadsPro Backend Running'
+  });
 });
 
 // 404 handler
-app.use((req, res, next) => {
-  if (req.path.startsWith('/api')) {
-    return res.status(404).json({ success: false, message: 'Route not found' });
-  }
-  res.sendFile(path.join(__dirname, '../frontend/login.html'));
+app.use((req, res) => {
+  res.status(404).json({
+    success: false,
+    message: 'Route not found'
+  });
 });
 
 // Error handler
