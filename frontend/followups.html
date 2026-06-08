@@ -197,7 +197,7 @@
     // ===== OPEN ADD MODAL (Loads dynamic leads inside dropdown) =====
     async function openAddModal() {
       try {
-        const res = await fetch('/api/leads?limit=100', { headers:{ 'Authorization':`Bearer ${token}` } });
+        const res = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/leads?limit=100', { headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success && data.data) {
           const sel = document.getElementById('fu_lead');
@@ -332,7 +332,7 @@
     // ===== LOAD DATA =====
     async function loadFollowUps() {
       try {
-        const res  = await fetch('/api/followups', { headers:{ 'Authorization':`Bearer ${token}` } });
+        const res  = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/followups', { headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) {
           allFollowUps = data.data;
@@ -409,7 +409,7 @@
       const newDate = prompt('Enter new date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
       if (!newDate) return;
       try {
-        const res  = await fetch(`/api/followups/${id}/reschedule`, {
+        const res  = await fetch(`http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/followups/${id}/reschedule`, {
           method: 'PUT',
           headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
           body: JSON.stringify({ follow_up_date: newDate })
@@ -423,7 +423,7 @@
     // ===== MARK DONE =====
     async function markDone(id) {
       try {
-        const res  = await fetch(`/api/followups/${id}/done`, { method:'PUT', headers:{ 'Authorization':`Bearer ${token}` } });
+        const res  = await fetch(`http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/followups/${id}/done`, { method:'PUT', headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) { showToast('✅ Done!', 'ok'); loadFollowUps(); }
       } catch(e) { showToast('❌ Server error', 'err'); }
@@ -433,7 +433,7 @@
     async function deleteFollowUp(id) {
       if (!confirm('Do you want to Delete?')) return;
       try {
-        const res  = await fetch(`/api/followups/${id}`, { method:'DELETE', headers:{ 'Authorization':`Bearer ${token}` } });
+        const res  = await fetch(`http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/followups/${id}`, { method:'DELETE', headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) { showToast('✅ Deleted!', 'ok'); loadFollowUps(); }
       } catch(e) { showToast('❌ Server error', 'err'); }
@@ -450,7 +450,7 @@
       if (!lead_id || !follow_up_date) { showToast('⚠️ Lead ID and date required!', 'err'); return; }
 
       try {
-        const res  = await fetch('/api/followups', {
+        const res  = await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/followups', {
           method: 'POST',
           headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
           body: JSON.stringify({ lead_id, follow_up_date, follow_up_time, fu_type, notes })

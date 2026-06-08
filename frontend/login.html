@@ -71,7 +71,7 @@
       const password=document.getElementById('password').value;
       if(!email||!password){document.querySelector('.card').classList.add('shake');setTimeout(()=>document.querySelector('.card').classList.remove('shake'),300);showToast('⚠️ Enter Email and Password!','err');return;}
       try{
-        const res=await fetch('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+        const res=await fetch('http://ofxfa7sc0j4lxwc21ztc5uwn.187.127.132.57.sslip.io/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
         const data=await res.json();
         if(data.success){localStorage.setItem('token',data.token);localStorage.setItem('user',JSON.stringify(data.user));showToast('✅ Login successful!','ok');setTimeout(()=>window.location.href='dashboard.html',1000);}
         else{document.querySelector('.card').classList.add('shake');setTimeout(()=>document.querySelector('.card').classList.remove('shake'),300);showToast('❌ '+data.message,'err');}
