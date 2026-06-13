@@ -1,24 +1,21 @@
-const mysql = require('mysql2/promise'); // promise wrapper use kiya hai
+const mysql = require('mysql2/promise');
 require('dotenv').config();
 
-// Connection Configuration
 const dbConfig = {
- host: process.env.DB_HOST,
-user: process.env.DB_USER,
-password: process.env.DB_PASSWORD,
-database: process.env.DB_NAME,
+  host: process.env.DB_HOST,
+  user: process.env.DB_USER,
+  password: process.env.DB_PASSWORD,
+  database: process.env.DB_NAME,
   port: 3306
 };
 
-// Promise-based connection pooling setup (best practice for production/dev)
 const pool = mysql.createPool(dbConfig);
 
-// Connection check karne ke liye ek immediate test function
 (async () => {
   try {
     const connection = await pool.getConnection();
     console.log('✅ MySQL Connected perfectly with Promises!');
-    connection.release(); // connection test karke free kiya
+    connection.release();
   } catch (err) {
     console.log('❌ DB Connection Failed:', err.message);
   }
