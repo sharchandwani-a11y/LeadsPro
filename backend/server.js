@@ -19,6 +19,7 @@ app.use('/api/auth',      require('./routes/auth'));
 app.use('/api/leads',     require('./routes/leads'));
 app.use('/api/meetings',  require('./routes/meetings'));
 app.use('/api/followups', require('./routes/followups'));
+app.use('/api/clients', require('./routes/clients'));
 
 // Root — login page pe redirect
 app.get('/', (req, res) => {
