@@ -525,7 +525,33 @@
     async function saveLead(){
       const body={name:document.getElementById('f_name').value.trim(),phone:document.getElementById('f_phone').value.trim(),email:document.getElementById('f_email').value.trim(),source:document.getElementById('f_source').value,status:document.getElementById('f_status').value,priority:document.getElementById('f_priority').value,notes:document.getElementById('f_notes').value.trim()};
       if(!body.name||!body.phone){showToast('⚠️ Name and phone required!','err');return;}
-      try{const res=await fetch(editId?`https://api.leadspro.tech/api/leads/${editId}`:'/api/leads',{method:editId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(body)});const data=await res.json();if(data.success){showToast('✅ '+data.message,'ok');closeModal();loadLeads();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+     try {
+  const res = await fetch(
+    editId
+      ? `https://api.leadspro.tech/api/leads/${editId}`
+      : 'https://api.leadspro.tech/api/leads',
+    {
+      method: editId ? 'PUT' : 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${token}`
+      },
+      body: JSON.stringify(body)
+    }
+  );
+
+  const data = await res.json();
+
+  if (data.success) {
+    showToast('✅ ' + data.message, 'ok');
+    closeModal();
+    loadLeads();
+  } else {
+    showToast('❌ ' + data.message, 'err');
+  }
+} catch (e) {
+  showToast('❌ Server error', 'err');
+}
     }
 
     async function deleteLead(id){
