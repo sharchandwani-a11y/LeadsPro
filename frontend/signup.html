@@ -4,8 +4,8 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Sign Up</title>
-<link rel="icon" type="image/jpeg" href="logo.jpeg"/>
- <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
     *{box-sizing:border-box;margin:0;padding:0;font-family:'Plus Jakarta Sans',sans-serif;}
     body{background:#0f0a1e;min-height:100vh;display:flex;align-items:center;justify-content:center;overflow-x:hidden;position:relative;}
@@ -15,7 +15,6 @@
     .inp{background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,255,255,0.1);border-radius:10px;color:white;width:100%;padding:11px 16px 11px 42px;font-size:14px;outline:none;transition:all 0.2s;font-family:'Plus Jakarta Sans',sans-serif;}
     .inp:focus{border-color:#6C3EF4;background:rgba(108,62,244,0.1);}
     .inp::placeholder{color:rgba(255,255,255,0.3);}
-    .inp-plain{padding:11px 16px;}
     .btn{background:linear-gradient(135deg,#6C3EF4,#4F46E5);border-radius:10px;padding:14px;color:white;font-weight:700;width:100%;font-size:14px;border:none;cursor:pointer;transition:all 0.2s;box-shadow:0 8px 24px rgba(108,62,244,0.4);}
     .btn:hover{transform:translateY(-2px);}
     label{color:rgba(255,255,255,0.5);font-size:11px;font-weight:600;display:block;margin-bottom:6px;}
@@ -39,21 +38,19 @@
   <div id="toast" class="toast"></div>
 
   <div class="card">
-    <!-- Logo -->
     <div style="text-align:center;margin-bottom:24px;">
       <img src="logo.jpeg" style="width:52px;height:52px;border-radius:12px;object-fit:cover;margin:0 auto 12px;display:block;" onerror="this.style.display='none'"/>
       <h1 style="color:white;font-size:22px;font-weight:800;">LeadsPro CRM</h1>
       <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-top:4px;">14 Days Free Trial — No credit card required</p>
     </div>
 
-    <!-- Progress Bar -->
     <div class="progress-bar">
       <div class="progress-step done" id="prog1"></div>
       <div class="progress-step" id="prog2"></div>
       <div class="progress-step" id="prog3"></div>
     </div>
 
-    <!-- STEP 1: Company Info -->
+    <!-- STEP 1 -->
     <div class="step active" id="step1">
       <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Company Details</h2>
       <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">Enter Your Company Details</p>
@@ -84,25 +81,22 @@
 
       <div style="margin-bottom:20px;">
         <label>INDUSTRY</label>
-         
         <div style="position:relative;">
-           <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
+          <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/></svg>
           <input type="text" id="company_industry" class="inp" placeholder="Enter Industry"/>
-          <div style="margin-bottom:20px;"></div>
-        
-        
+        </div>
       </div>
 
       <button class="btn" onclick="goStep2()">Next →</button>
       <p style="text-align:center;color:rgba(255,255,255,0.3);font-size:12px;margin-top:16px;">
-        Already have an Account? <a href="login.html" style="color:#A78BFA;font-weight:600;">Login </a>
+        Already have an Account? <a href="login.html" style="color:#A78BFA;font-weight:600;">Login</a>
       </p>
     </div>
 
-    <!-- STEP 2: Password -->
+    <!-- STEP 2 -->
     <div class="step" id="step2">
       <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Account Setup</h2>
-      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">Set Strong Passward</p>
+      <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">Set Strong Password</p>
 
       <div style="margin-bottom:14px;">
         <label>PASSWORD *</label>
@@ -122,7 +116,7 @@
         <label>CONFIRM PASSWORD *</label>
         <div style="position:relative;">
           <svg style="position:absolute;left:13px;top:50%;transform:translateY(-50%);" width="16" height="16" fill="none" stroke="rgba(255,255,255,0.3)" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-          <input type="password" id="confirm_password" class="inp" placeholder="Password dobara daalo"/>
+          <input type="password" id="confirm_password" class="inp" placeholder="Re-enter password"/>
         </div>
       </div>
 
@@ -132,9 +126,9 @@
       </div>
     </div>
 
-    <!-- STEP 3: Plan Select -->
+    <!-- STEP 3 -->
     <div class="step" id="step3">
-      <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Choose Plan </h2>
+      <h2 style="color:white;font-size:18px;font-weight:700;margin-bottom:6px;">Choose Plan</h2>
       <p style="color:rgba(255,255,255,0.4);font-size:13px;margin-bottom:20px;">14 Days Free Trial — Upgrade Later</p>
 
       <div class="plan-card selected" onclick="selectPlan('trial', this)">
@@ -178,7 +172,6 @@
   </div>
 
   <script>
-    let currentStep = 1;
     let selectedPlan = 'trial';
 
     function showToast(msg, type) {
@@ -204,8 +197,7 @@
       const name  = document.getElementById('company_name').value.trim();
       const email = document.getElementById('company_email').value.trim();
       if (!name || !email) { showToast('⚠️ Company Name and Email Required!', 'err'); return; }
-      if (!email.includes('@')) { showToast('⚠️Enter Valid Email !', 'err'); return; }
-
+      if (!email.includes('@')) { showToast('⚠️ Enter Valid Email!', 'err'); return; }
       document.getElementById('step1').classList.remove('active');
       document.getElementById('step2').classList.add('active');
       updateProgress(2);
@@ -215,8 +207,7 @@
       const pass    = document.getElementById('password').value;
       const confirm = document.getElementById('confirm_password').value;
       if (pass.length < 8) { showToast('⚠️ Password min 8 characters!', 'err'); return; }
-      if (pass !== confirm) { showToast('⚠️ Passwords didnot Match!', 'err'); return; }
-
+      if (pass !== confirm) { showToast('⚠️ Passwords did not match!', 'err'); return; }
       document.getElementById('step2').classList.remove('active');
       document.getElementById('step3').classList.add('active');
       updateProgress(3);
@@ -248,7 +239,7 @@
       const plan         = document.getElementById('selected_plan').value;
 
       const btn = document.querySelector('#step3 .btn');
-      btn.textContent = '⏳Creating Account ...';
+      btn.textContent = '⏳ Creating Account...';
       btn.disabled = true;
 
       try {
@@ -258,11 +249,10 @@
           body:    JSON.stringify({ company_name, email, phone, industry, password, plan })
         });
         const data = await res.json();
-
         if (data.success) {
           localStorage.setItem('token', data.token);
           localStorage.setItem('user',  JSON.stringify(data.user));
-          showToast('✅ Account Created Succesfully!  Redirecting...', 'ok');
+          showToast('✅ Account Created Successfully! Redirecting...', 'ok');
           setTimeout(() => window.location.href = 'dashboard.html', 1500);
         } else {
           showToast('❌ ' + data.message, 'err');
@@ -270,7 +260,7 @@
           btn.disabled = false;
         }
       } catch(e) {
-        showToast('❌ Didnot Connected with Server', 'err');
+        showToast('❌ Could not connect to server', 'err');
         btn.textContent = '🚀 Start Free Trial';
         btn.disabled = false;
       }
