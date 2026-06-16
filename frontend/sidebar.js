@@ -6,15 +6,12 @@ function renderSidebar(activePage) {
     { href:'dashboard.html', label:'Dashboard', icon:`<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>` },
     { href:'leads.html',     label:'Leads',     icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>` },
     { href:'meetings.html',  label:'Meetings',  icon:`<rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>` },
-     { href:'clients.html',   label:'Clients',   icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>` },
+    { href:'clients.html',   label:'Clients',   icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>` },
     { href:'followups.html', label:'Follow Ups',icon:`<path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6z"/>` },
     { href:'task.html', label:'Tasks', icon:`<path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>` },
     ...(isAdmin ? [{ href:'users.html', label:'Users', icon:`<path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>` }] : []),
     { href:'settings.html',  label:'Settings',  icon:`<circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/>` },
-    
   ];
-  
-
 
   document.getElementById('sidebar').innerHTML = `
     <div style="display:flex;flex-direction:column;height:100%;">
@@ -33,27 +30,72 @@ function renderSidebar(activePage) {
       </div>
 
       <nav style="display:flex;flex-direction:column;gap:2px;flex:1;overflow-y:auto;overflow-x:hidden;">
-        ${pages.map(p => `
-          <a href="${p.href}" style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;color:${p.label===activePage?'white':'rgba(167,139,250,0.9)'};background:${p.label===activePage?'#6C3EF4':'transparent'};transition:background 0.2s;">
-            <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">${p.icon}</svg>
-            <span style="flex:1;">${p.label}</span>
-            ${p.label==='Users'?'<span style="background:rgba(239,68,68,0.7);color:white;font-size:9px;padding:1px 5px;border-radius:6px;">Admin</span>':''}
-          </a>
-        `).join('')}
+        ${pages.map(p => {
+          const isActive = p.label === activePage;
+          return `
+            <a href="${p.href}" 
+               style="display:flex;align-items:center;gap:11px;padding:10px 11px;border-radius:10px;text-decoration:none;font-size:13px;font-weight:600;color:${isActive ? 'white' : 'rgba(167,139,250,0.8)'};background:${isActive ? '#6C3EF4' : 'transparent'};transition:all 0.25s ease;cursor:pointer;position:relative;"
+               onmouseover="this.style.background='${isActive ? '#6C3EF4' : 'rgba(108,62,244,0.15)'}'; this.style.color='${isActive ? 'white' : 'white'}'"
+               onmouseout="this.style.background='${isActive ? '#6C3EF4' : 'transparent'}'; this.style.color='${isActive ? 'white' : 'rgba(167,139,250,0.8)'}'"
+               onclick="handleSidebarClick('${p.href}')">
+              <svg width="17" height="17" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="flex-shrink:0;">${p.icon}</svg>
+              <span style="flex:1;">${p.label}</span>
+              ${p.label === 'Users' ? '<span style="background:rgba(239,68,68,0.7);color:white;font-size:9px;padding:1px 5px;border-radius:6px;">Admin</span>' : ''}
+              ${isActive ? '<span style="width:3px;height:20px;background:white;border-radius:4px;flex-shrink:0;"></span>' : ''}
+            </a>
+          `;
+        }).join('')}
       </nav>
 
       <div style="flex-shrink:0;margin-top:12px;">
-        <div style="background:linear-gradient(135deg,#7C3AED,#4F46E5);border-radius:12px;padding:14px;margin-bottom:8px;">
+        <div style="background:linear-gradient(135deg,#7C3AED,#4F46E5);border-radius:12px;padding:14px;margin-bottom:8px;transition:transform 0.2s;cursor:pointer;"
+             onmouseover="this.style.transform='scale(1.02)'"
+             onmouseout="this.style.transform='scale(1)'">
           <div style="color:white;font-weight:700;font-size:13px;margin-bottom:3px;">Upgrade Plan 🚀</div>
           <p style="color:rgba(255,255,255,0.65);font-size:11px;margin-bottom:10px;line-height:1.4;">More features unlock karo</p>
-          <button style="width:100%;background:white;color:#6C3EF4;font-weight:700;font-size:12px;padding:7px;border-radius:8px;border:none;cursor:pointer;">Upgrade Now</button>
+          <button style="width:100%;background:white;color:#6C3EF4;font-weight:700;font-size:12px;padding:7px;border-radius:8px;border:none;cursor:pointer;transition:all 0.2s;"
+                  onmouseover="this.style.background='#EDE9FE'; this.style.transform='scale(1.02)'"
+                  onmouseout="this.style.background='white'; this.style.transform='scale(1)'">
+            Upgrade Now
+          </button>
         </div>
-        <button onclick="logout()" style="width:100%;background:rgba(239,68,68,0.1);color:#FCA5A5;border:1px solid rgba(239,68,68,0.2);padding:9px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;">
+        <button onclick="logout()" 
+                style="width:100%;background:rgba(239,68,68,0.1);color:#FCA5A5;border:1px solid rgba(239,68,68,0.2);padding:9px;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.25s ease;"
+                onmouseover="this.style.background='rgba(239,68,68,0.2)'; this.style.borderColor='rgba(239,68,68,0.4)'; this.style.transform='scale(1.02)'"
+                onmouseout="this.style.background='rgba(239,68,68,0.1)'; this.style.borderColor='rgba(239,68,68,0.2)'; this.style.transform='scale(1)'">
           🚪 Logout
         </button>
       </div>
     </div>
   `;
+}
+
+// ── Handle Sidebar Click with Highlight ──
+function handleSidebarClick(href) {
+  // Add active class to clicked item
+  const navLinks = document.querySelectorAll('nav a');
+  navLinks.forEach(link => {
+    link.style.background = 'transparent';
+    link.style.color = 'rgba(167,139,250,0.8)';
+    const indicator = link.querySelector('span:last-child');
+    if (indicator && indicator.style && indicator.style.width === '3px') {
+      indicator.remove();
+    }
+  });
+
+  // Highlight clicked link
+  const clicked = Array.from(navLinks).find(a => a.getAttribute('href') === href);
+  if (clicked) {
+    clicked.style.background = '#6C3EF4';
+    clicked.style.color = 'white';
+    // Add indicator
+    const indicator = document.createElement('span');
+    indicator.style.cssText = 'width:3px;height:20px;background:white;border-radius:4px;flex-shrink:0;';
+    clicked.appendChild(indicator);
+  }
+
+  // Navigate
+  window.location.href = href;
 }
 
 function openSidebar() {
@@ -107,15 +149,40 @@ function injectCommonStyles() {
     .badge-New        { background:#EEF2FF; color:#4F46E5; }
     .badge-Contacted  { background:#FFF7ED; color:#EA580C; }
     .badge-Interested { background:#F0FDF4; color:#16A34A; }
-    .badge-Follow\ Up { background:#FFF1F2; color:#E11D48; }
+    .badge-Follow\\ Up { background:#FFF1F2; color:#E11D48; }
     .badge-Converted  { background:#ECFDF5; color:#059669; }
     .badge-Lost       { background:#F3F4F6; color:#6B7280; }
-    .src-Facebook\ Ads { background:#EEF2FF; color:#4F46E5; }
+    .src-Facebook\\ Ads { background:#EEF2FF; color:#4F46E5; }
     .src-Instagram     { background:#FDF2F8; color:#C026D3; }
     .src-Website       { background:#ECFDF5; color:#059669; }
     .src-Referral      { background:#FFF7ED; color:#D97706; }
     .src-Others        { background:#F3F4F6; color:#6B7280; }
     .avatar { width:34px; height:34px; border-radius:50%; display:flex; align-items:center; justify-content:center; font-size:0.72rem; font-weight:700; color:white; flex-shrink:0; }
+
+    /* Sidebar Hover Animation */
+    nav a {
+      position: relative;
+      overflow: hidden;
+      transition: all 0.25s ease !important;
+    }
+    nav a::after {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 0;
+      bottom: 0;
+      width: 3px;
+      background: white;
+      transform: scaleY(0);
+      transition: transform 0.25s ease;
+      border-radius: 0 4px 4px 0;
+    }
+    nav a:hover::after {
+      transform: scaleY(1);
+    }
+    nav a.active::after {
+      transform: scaleY(1);
+    }
 
     @media (max-width:768px) {
       .sidebar { position:fixed !important; top:0; left:0; bottom:0; z-index:50; transform:translateX(-100%); width:240px !important; min-width:240px !important; max-width:240px !important; }
