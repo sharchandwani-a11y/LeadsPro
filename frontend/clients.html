@@ -7,6 +7,34 @@
   <link rel="icon" type="image/png" href="logosrbg.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="sidebar.js"></script>
+  <style>
+    .modal {
+      position: fixed;
+      inset: 0;
+      z-index: 999;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1;
+    }
+    .modal-content {
+      position: relative;
+      z-index: 2;
+      background: white;
+      border-radius: 16px;
+      width: 100%;
+      max-width: 480px;
+      margin: 0 auto;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+  </style>
 </head>
 <body>
   <div id="toast" class="toast"></div>
@@ -30,7 +58,7 @@
         <!-- Stat Cards -->
         <div id="statsGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;">
 
-          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(108,62,244,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
               <div style="width:42px;height:42px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="19" height="19" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
@@ -41,7 +69,7 @@
             <div style="margin-top:8px;"><span style="background:#D1FAE5;color:#065F46;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">↑ Growing</span></div>
           </div>
 
-          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
               <div style="width:42px;height:42px;border-radius:12px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="19" height="19" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><path d="M9 12h6m-6 4h6m2-13H7a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V5a2 2 0 0 0-2-2z"/></svg>
@@ -52,7 +80,7 @@
             <div style="margin-top:8px;"><span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">📄 Files</span></div>
           </div>
 
-          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(14,165,233,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;">
             <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
               <div style="width:42px;height:42px;border-radius:12px;background:#DBEAFE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
                 <svg width="19" height="19" fill="none" stroke="#2563EB" stroke-width="2" viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
@@ -102,7 +130,7 @@
   </div>
 
   <!-- Add/Edit Client Modal -->
-  <div id="clientModal" class="modal" style="display:none;">
+  <div id="clientModal" class="modal">
     <div class="modal-overlay" onclick="closeModal()"></div>
     <div class="modal-content">
       <div style="padding:20px;border-bottom:1px solid #F3F4F6;">
@@ -111,31 +139,31 @@
       <form id="clientForm" onsubmit="submitClientForm(event)" style="padding:20px;display:flex;flex-direction:column;gap:14px;">
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Client Name *</label>
-          <input type="text" id="clientName" required style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+          <input type="text" id="clientName" required class="inp">
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Email</label>
-            <input type="email" id="clientEmail" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            <input type="email" id="clientEmail" class="inp">
           </div>
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Phone</label>
-            <input type="tel" id="clientPhone" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            <input type="tel" id="clientPhone" class="inp">
           </div>
         </div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Company</label>
-            <input type="text" id="clientCompany" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            <input type="text" id="clientCompany" class="inp">
           </div>
           <div>
             <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Address</label>
-            <input type="text" id="clientAddress" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+            <input type="text" id="clientAddress" class="inp">
           </div>
         </div>
         <div>
           <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Notes</label>
-          <textarea id="clientNotes" style="width:100%;padding:10px 12px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;resize:vertical;min-height:80px;"></textarea>
+          <textarea id="clientNotes" class="inp" style="resize:vertical;min-height:80px;"></textarea>
         </div>
         <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:10px;">
           <button type="button" onclick="closeModal()" style="background:#F3F4F6;color:#374151;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
@@ -146,19 +174,20 @@
   </div>
 
   <!-- View Client Modal -->
-  <div id="viewModal" class="modal" style="display:none;">
+  <div id="viewModal" class="modal">
     <div class="modal-overlay" onclick="closeViewModal()"></div>
-    <div class="modal-content" style="max-width:600px;max-height:80vh;overflow-y:auto;">
+    <div class="modal-content" style="max-width:600px;max-height:85vh;">
       <div style="padding:20px;border-bottom:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;position:sticky;top:0;background:white;z-index:10;">
         <h2 id="viewTitle" style="font-weight:700;color:#111827;font-size:16px;">Client Details</h2>
-        <button onclick="closeViewModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#6B7280;">&times;</button>
+        <button onclick="closeViewModal()" style="background:none;border:none;font-size:24px;cursor:pointer;color:#6B7280;line-height:1;">&times;</button>
       </div>
       <div id="viewContent" style="padding:20px;"></div>
     </div>
   </div>
-  <div style="position: fixed; bottom: 20px; right: 30px; z-index: 9999; color: #7c3aed; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;">
-    Powered By VIPPROW
-</div>
+
+  <div style="position:fixed;bottom:20px;right:30px;z-index:60;color:#7c3aed;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;">
+    Powered By <a href="https://vipprow.com/" target="_blank" rel="noopener noreferrer"   className="hover:text-purple-300 transition-colors duration-300" ><b>VIPPROW</b></a>
+  </div>
 
   <script>
     injectCommonStyles();
@@ -171,10 +200,11 @@
     const user  = JSON.parse(localStorage.getItem('user') || '{}');
     if (!token) window.location.href = 'login.html';
 
+    const API = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'https://api.leadspro.tech';
+
     const avColors = ['#6C3EF4','#EC4899','#0EA5E9','#10B981','#F59E0B','#EF4444'];
     function getInitials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
     function getColor(n){return avColors[(n||'A').charCodeAt(0)%avColors.length];}
-    let currentPage = 1;
     let currentClientId = null;
 
     // ── Modal Functions ──
@@ -208,7 +238,7 @@
 
       try{
         const method = currentClientId ? 'PUT' : 'POST';
-        const url = `https://api.leadspro.tech/api/clients${currentClientId ? '/' + currentClientId : ''}`;
+        const url = `${API}/api/clients${currentClientId ? '/' + currentClientId : ''}`;
         const res = await fetch(url, {
           method,
           headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
@@ -216,32 +246,29 @@
         });
         const result = await res.json();
         if(result.success){
-          showToast(currentClientId ? 'Client updated!' : 'Client added!', 'success');
+          showToast(currentClientId ? '✅ Client updated!' : '✅ Client added!', 'ok');
           closeModal();
           loadClients();
+          loadStats();
         } else {
-          showToast(result.message || 'Error', 'error');
+          showToast('❌ ' + (result.message || 'Error'), 'err');
         }
       } catch(e){
-        showToast('Error: ' + e.message, 'error');
+        showToast('❌ Server error: ' + e.message, 'err');
       }
     }
 
     // ── Load Stats ──
     async function loadStats(){
       try{
-        const res = await fetch('https://api.leadspro.tech/api/clients/stats', {
-          headers: {'Authorization': `Bearer ${token}`}
-        });
+        const res = await fetch(`${API}/api/clients/stats`, { headers: {'Authorization': `Bearer ${token}`} });
         const data = await res.json();
         if(data.success && data.stats){
           document.getElementById('totalClients').textContent = data.stats.total || 0;
           document.getElementById('totalDocuments').textContent = data.stats.documents || 0;
           document.getElementById('totalNotes').textContent = data.stats.notes || 0;
         }
-      } catch(e){
-        console.error('Stats error:', e);
-      }
+      } catch(e){ console.error('Stats error:', e); }
     }
 
     // ── Load Clients ──
@@ -249,19 +276,17 @@
       try{
         const search = document.getElementById('searchInput').value;
         const company = document.getElementById('companyFilter').value;
-        let url = `https://api.leadspro.tech/api/clients?page=${page}&limit=10`;
+        let url = `${API}/api/clients?page=${page}&limit=10`;
         if(search) url += `&search=${encodeURIComponent(search)}`;
         if(company) url += `&company=${encodeURIComponent(company)}`;
 
-        const res = await fetch(url, {
-          headers: {'Authorization': `Bearer ${token}`}
-        });
+        const res = await fetch(url, { headers: {'Authorization': `Bearer ${token}`} });
         const data = await res.json();
         const tbody = document.getElementById('clientsTableBody');
 
         if(data.success && data.data.length > 0){
           tbody.innerHTML = data.data.map(c => `
-            <tr style="border-bottom:1px solid #F9FAFB;cursor:pointer;" onclick="viewClient(${c.id})" onmouseover="this.style.background='#F9FAFB'" onmouseout="this.style.background='white'">
+            <tr style="border-bottom:1px solid #F9FAFB;cursor:pointer;" onclick="viewClient(${c.id})">
               <td style="padding:10px 16px;">
                 <div style="display:flex;align-items:center;gap:8px;">
                   <div class="avatar" style="background:${getColor(c.name)}">${getInitials(c.name)}</div>
@@ -279,18 +304,17 @@
             </tr>
           `).join('');
 
-          // Pagination
           const totalPages = data.pagination?.pages || 1;
           const total = data.pagination?.total || 0;
           document.getElementById('clientCount').textContent = `${total} clients`;
-          
+
+          let paginationHTML = '';
           if(totalPages > 1){
-            let paginationHTML = '';
             if(page > 1) paginationHTML += `<button onclick="loadClients(${page-1})" style="background:#F3F4F6;border:1px solid #E5E7EB;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">← Prev</button>`;
             paginationHTML += `<span style="font-size:12px;color:#6B7280;">Page ${page} of ${totalPages}</span>`;
             if(page < totalPages) paginationHTML += `<button onclick="loadClients(${page+1})" style="background:#F3F4F6;border:1px solid #E5E7EB;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Next →</button>`;
-            document.getElementById('pagination').innerHTML = paginationHTML;
           }
+          document.getElementById('pagination').innerHTML = paginationHTML;
         } else {
           tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#9CA3AF;">No clients found</td></tr>';
           document.getElementById('pagination').innerHTML = '';
@@ -303,9 +327,7 @@
     // ── View Client ──
     async function viewClient(id){
       try{
-        const res = await fetch(`https://api.leadspro.tech/api/clients/${id}`, {
-          headers: {'Authorization': `Bearer ${token}`}
-        });
+        const res = await fetch(`${API}/api/clients/${id}`, { headers: {'Authorization': `Bearer ${token}`} });
         const data = await res.json();
         if(data.success && data.data){
           const c = data.data;
@@ -332,7 +354,7 @@
                 <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:16px;">
                   ${c.documents.map(d => `
                     <div style="display:flex;justify-content:space-between;align-items:center;padding:10px;background:#F9FAFB;border-radius:6px;">
-                      <a href="https://api.leadspro.tech${d.file_path}" target="_blank" style="flex:1;color:#6C3EF4;text-decoration:none;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;">${d.doc_name}</a>
+                      <a href="${API}${d.file_path}" target="_blank" style="flex:1;color:#6C3EF4;text-decoration:none;font-size:12px;font-weight:600;overflow:hidden;text-overflow:ellipsis;">${d.doc_name}</a>
                       <button onclick="deleteDoc(${d.id})" style="background:none;border:none;color:#EF4444;cursor:pointer;font-size:12px;">🗑️</button>
                     </div>
                   `).join('')}
@@ -362,16 +384,14 @@
           currentClientId = id;
         }
       } catch(e){
-        showToast('Error loading client', 'error');
+        showToast('❌ Error loading client', 'err');
       }
     }
 
     // ── Load Notes ──
     async function loadNotes(clientId){
       try{
-        const res = await fetch(`https://api.leadspro.tech/api/clients/notes/${clientId}`, {
-          headers: {'Authorization': `Bearer ${token}`}
-        });
+        const res = await fetch(`${API}/api/clients/notes/${clientId}`, { headers: {'Authorization': `Bearer ${token}`} });
         const data = await res.json();
         const notesList = document.getElementById('notesList');
         if(data.success && data.data.length > 0){
@@ -384,10 +404,10 @@
               <button onclick="deleteNote(${n.id})" style="background:none;border:none;color:#EF4444;cursor:pointer;font-size:12px;">🗑️</button>
             </div>
           `).join('');
+        } else {
+          notesList.innerHTML = '<p style="font-size:12px;color:#9CA3AF;">No notes yet</p>';
         }
-      } catch(e){
-        console.error('Error loading notes:', e);
-      }
+      } catch(e){ console.error('Error loading notes:', e); }
     }
 
     // ── Add Note ──
@@ -396,7 +416,7 @@
       if(!noteText.trim()) return;
 
       try{
-        const res = await fetch('https://api.leadspro.tech/api/clients/notes', {
+        const res = await fetch(`${API}/api/clients/notes`, {
           method: 'POST',
           headers: {'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json'},
           body: JSON.stringify({client_id: clientId, note: noteText})
@@ -405,10 +425,11 @@
         if(data.success){
           document.getElementById('newNote').value = '';
           loadNotes(clientId);
-          showToast('Note added!', 'success');
+          loadStats();
+          showToast('✅ Note added!', 'ok');
         }
       } catch(e){
-        showToast('Error adding note', 'error');
+        showToast('❌ Error adding note', 'err');
       }
     }
 
@@ -416,18 +437,14 @@
     async function deleteNote(noteId){
       if(confirm('Delete this note?')){
         try{
-          const res = await fetch(`https://api.leadspro.tech/api/clients/notes/${noteId}`, {
-            method: 'DELETE',
-            headers: {'Authorization': `Bearer ${token}`}
-          });
+          const res = await fetch(`${API}/api/clients/notes/${noteId}`, { method: 'DELETE', headers: {'Authorization': `Bearer ${token}`} });
           const data = await res.json();
           if(data.success){
             loadNotes(currentClientId);
-            showToast('Note deleted!', 'success');
+            loadStats();
+            showToast('✅ Note deleted!', 'ok');
           }
-        } catch(e){
-          showToast('Error deleting note', 'error');
-        }
+        } catch(e){ showToast('❌ Error deleting note', 'err'); }
       }
     }
 
@@ -441,7 +458,7 @@
       formData.append('client_id', clientId);
 
       try{
-        const res = await fetch('https://api.leadspro.tech/api/clients/upload-document', {
+        const res = await fetch(`${API}/api/clients/upload-document`, {
           method: 'POST',
           headers: {'Authorization': `Bearer ${token}`},
           body: formData
@@ -450,12 +467,13 @@
         if(data.success){
           input.value = '';
           viewClient(clientId);
-          showToast('Document uploaded!', 'success');
+          loadStats();
+          showToast('✅ Document uploaded!', 'ok');
         } else {
-          showToast(data.message || 'Upload failed', 'error');
+          showToast('❌ ' + (data.message || 'Upload failed'), 'err');
         }
       } catch(e){
-        showToast('Error uploading document', 'error');
+        showToast('❌ Error uploading document', 'err');
       }
     }
 
@@ -463,27 +481,21 @@
     async function deleteDoc(docId){
       if(confirm('Delete this document?')){
         try{
-          const res = await fetch(`https://api.leadspro.tech/api/clients/documents/${docId}`, {
-            method: 'DELETE',
-            headers: {'Authorization': `Bearer ${token}`}
-          });
+          const res = await fetch(`${API}/api/clients/documents/${docId}`, { method: 'DELETE', headers: {'Authorization': `Bearer ${token}`} });
           const data = await res.json();
           if(data.success){
             viewClient(currentClientId);
-            showToast('Document deleted!', 'success');
+            loadStats();
+            showToast('✅ Document deleted!', 'ok');
           }
-        } catch(e){
-          showToast('Error deleting document', 'error');
-        }
+        } catch(e){ showToast('❌ Error deleting document', 'err'); }
       }
     }
 
     // ── Edit Client ──
     async function editClientModal(id){
       try{
-        const res = await fetch(`https://api.leadspro.tech/api/clients/${id}`, {
-          headers: {'Authorization': `Bearer ${token}`}
-        });
+        const res = await fetch(`${API}/api/clients/${id}`, { headers: {'Authorization': `Bearer ${token}`} });
         const data = await res.json();
         if(data.success){
           const c = data.data;
@@ -498,53 +510,33 @@
           closeViewModal();
           document.getElementById('clientModal').style.display = 'flex';
         }
-      } catch(e){
-        showToast('Error loading client', 'error');
-      }
+      } catch(e){ showToast('❌ Error loading client', 'err'); }
     }
 
-    async function editClient(id){
-      editClientModal(id);
-    }
+    async function editClient(id){ editClientModal(id); }
 
     // ── Delete Client ──
     async function deleteClient(id){
       if(confirm('Are you sure? This will delete all associated documents and notes.')){
         try{
-          const res = await fetch(`https://api.leadspro.tech/api/clients/${id}`, {
-            method: 'DELETE',
-            headers: {'Authorization': `Bearer ${token}`}
-          });
+          const res = await fetch(`${API}/api/clients/${id}`, { method: 'DELETE', headers: {'Authorization': `Bearer ${token}`} });
           const data = await res.json();
           if(data.success){
             closeViewModal();
             loadClients();
-            showToast('Client deleted!', 'success');
+            loadStats();
+            showToast('✅ Client deleted!', 'ok');
           }
-        } catch(e){
-          showToast('Error deleting client', 'error');
-        }
+        } catch(e){ showToast('❌ Error deleting client', 'err'); }
       }
-    }
-
-    // ── Toast ──
-    function showToast(msg, type = 'info'){
-      const toast = document.getElementById('toast');
-      toast.textContent = msg;
-      toast.className = `toast show toast-${type}`;
-      setTimeout(() => toast.className = 'toast', 3000);
     }
 
     // ── Responsive Grid ──
     function fixGrid(){
       const g = document.getElementById('statsGrid');
-      if(window.innerWidth < 640){
-        g.style.gridTemplateColumns = '1fr';
-      } else if(window.innerWidth < 1024){
-        g.style.gridTemplateColumns = 'repeat(2,1fr)';
-      } else {
-        g.style.gridTemplateColumns = 'repeat(3,1fr)';
-      }
+      if(window.innerWidth < 640) g.style.gridTemplateColumns = '1fr';
+      else if(window.innerWidth < 1024) g.style.gridTemplateColumns = 'repeat(2,1fr)';
+      else g.style.gridTemplateColumns = 'repeat(3,1fr)';
     }
     fixGrid();
     window.addEventListener('resize', fixGrid);

@@ -4,6 +4,7 @@ const db = require('../config/db');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const protect = require('../middleware/authMiddleware');
 
 // 📁 FILE UPLOAD CONFIGURATION
 const uploadsDir = path.join(__dirname, '../uploads/client-documents');
@@ -27,7 +28,7 @@ const upload = multer({
   fileFilter: (req, file, cb) => {
     const allowedExtensions = ['.pdf', '.doc', '.docx', '.xls', '.xlsx', '.jpg', '.png', '.jpeg'];
     const fileExtension = path.extname(file.originalname).toLowerCase();
-    
+
     if (allowedExtensions.includes(fileExtension)) {
       cb(null, true);
     } else {
@@ -35,14 +36,6 @@ const upload = multer({
     }
   }
 });
-
-// ✅ MIDDLEWARE: Check authentication
-const authMiddleware = (req, res, next) => {
-  if (!req.user) {
-    return res.status(401).json({ success: false, message: 'Unauthorized' });
-  }
-  next();
-};
 
 // 📊 GET DASHBOARD STATS: Clients count
 exports.getClientsStats = async (req, res) => {
@@ -54,18 +47,14 @@ exports.getClientsStats = async (req, res) => {
       return res.json({ success: true, stats: { total: 0, documents: 0, notes: 0 } });
     }
 
-    let clientsQuery = `SELECT COUNT(*) AS total FROM clients WHERE admin_id = ?`;
-    let documentsQuery = `SELECT COUNT(*) AS total FROM client_documents WHERE admin_id = ?`;
-    let notesQuery = `SELECT COUNT(*) AS total FROM client_notes WHERE admin_id = ?`;
-    
     const params = [currentAdminId];
 
-    const [[{ total: totalClients }]] = await db.query(clientsQuery, params);
-    const [[{ total: totalDocuments }]] = await db.query(documentsQuery, params);
-    const [[{ total: totalNotes }]] = await db.query(notesQuery, params);
+    const [[{ total: totalClients }]] = await db.query('SELECT COUNT(*) AS total FROM clients WHERE admin_id = ?', params);
+    const [[{ total: totalDocuments }]] = await db.query('SELECT COUNT(*) AS total FROM client_documents WHERE admin_id = ?', params);
+    const [[{ total: totalNotes }]] = await db.query('SELECT COUNT(*) AS total FROM client_notes WHERE admin_id = ?', params);
 
-    res.json({ 
-      success: true, 
+    res.json({
+      success: true,
       message: 'Client stats fetched successfully',
       stats: {
         total: totalClients || 0,
@@ -87,10 +76,10 @@ exports.getAllClients = async (req, res) => {
     const isAdmin = req.user.role === 'admin';
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
-    let query = `SELECT c.*, u.name AS created_by_name, 
+    let query = `SELECT c.*, u.name AS created_by_name,
                  (SELECT COUNT(*) FROM client_documents WHERE client_id = c.id) AS doc_count,
                  (SELECT COUNT(*) FROM client_notes WHERE client_id = c.id) AS notes_count
-                 FROM clients c 
+                 FROM clients c
                  LEFT JOIN users u ON c.created_by = u.id
                  WHERE c.admin_id = ?`;
     const params = [currentAdminId];
@@ -106,26 +95,20 @@ exports.getAllClients = async (req, res) => {
       params.push(company);
     }
 
-    const baseCountQuery = `SELECT COUNT(*) AS total FROM clients c LEFT JOIN users u ON c.created_by = u.id WHERE c.admin_id = ?`;
-    let countParams = [currentAdminId];
-    
+    let countQuery = `SELECT COUNT(*) AS total FROM clients c LEFT JOIN users u ON c.created_by = u.id WHERE c.admin_id = ?`;
+    const countParams = [currentAdminId];
+
     if (search) {
+      countQuery += ' AND (c.name LIKE ? OR c.email LIKE ? OR c.phone LIKE ? OR c.company LIKE ?)';
       const s = `%${search}%`;
       countParams.push(s, s, s, s);
     }
     if (company) {
+      countQuery += ' AND c.company = ?';
       countParams.push(company);
     }
 
-    let finalCountQuery = baseCountQuery;
-    if (search) {
-      finalCountQuery += ' AND (c.name LIKE ? OR c.email LIKE ? OR c.phone LIKE ? OR c.company LIKE ?)';
-    }
-    if (company) {
-      finalCountQuery += ' AND c.company = ?';
-    }
-
-    const [[{ total }]] = await db.query(finalCountQuery, countParams);
+    const [[{ total }]] = await db.query(countQuery, countParams);
 
     query += ' ORDER BY c.created_at DESC LIMIT ? OFFSET ?';
     params.push(Number(limit), Number(offset));
@@ -151,26 +134,19 @@ exports.getClient = async (req, res) => {
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
     const [clientRows] = await db.query('SELECT * FROM clients WHERE id = ? AND admin_id = ?', [id, currentAdminId]);
-    
+
     if (clientRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
 
     const client = clientRows[0];
 
-    // Get documents
     const [documents] = await db.query('SELECT * FROM client_documents WHERE client_id = ? ORDER BY created_at DESC', [id]);
-
-    // Get notes
     const [notes] = await db.query('SELECT cn.*, u.name AS created_by_name FROM client_notes cn LEFT JOIN users u ON cn.created_by = u.id WHERE cn.client_id = ? ORDER BY cn.created_at DESC', [id]);
 
-    res.json({ 
-      success: true, 
-      data: {
-        ...client,
-        documents,
-        notes
-      }
+    res.json({
+      success: true,
+      data: { ...client, documents, notes, notes_count: notes.length }
     });
   } catch (err) {
     console.error('getClient error:', err.message);
@@ -189,33 +165,18 @@ exports.addClient = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Client name is required' });
     }
 
-    const query = `INSERT INTO clients (name, phone, email, company, address, notes, admin_id, created_by, created_at) 
+    const query = `INSERT INTO clients (name, phone, email, company, address, notes, admin_id, created_by, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())`;
-    
+
     const [result] = await db.query(query, [
-      name,
-      phone || null,
-      email || null,
-      company || null,
-      address || null,
-      notes || null,
-      currentAdminId,
-      req.user.id
+      name, phone || null, email || null, company || null, address || null, notes || null,
+      currentAdminId, req.user.id
     ]);
 
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: 'Client added successfully',
-      data: { 
-        id: result.insertId, 
-        name, 
-        phone, 
-        email, 
-        company, 
-        address, 
-        notes,
-        admin_id: currentAdminId 
-      } 
+      data: { id: result.insertId, name, phone, email, company, address, notes, admin_id: currentAdminId }
     });
   } catch (err) {
     console.error('addClient error:', err.message);
@@ -235,13 +196,8 @@ exports.updateClient = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Client name is required' });
     }
 
-    const query = `UPDATE clients SET 
-                   name = ?, phone = ?, email = ?, company = ?, address = ?, notes = ?
-                   WHERE id = ? AND admin_id = ?`;
-    
-    const [result] = await db.query(query, [
-      name, phone, email, company, address, notes, id, currentAdminId
-    ]);
+    const query = `UPDATE clients SET name=?, phone=?, email=?, company=?, address=?, notes=? WHERE id=? AND admin_id=?`;
+    const [result] = await db.query(query, [name, phone, email, company, address, notes, id, currentAdminId]);
 
     if (result.affectedRows === 0) {
       return res.status(403).json({ success: false, message: 'Unauthorized or client not found' });
@@ -262,11 +218,11 @@ exports.deleteClient = async (req, res) => {
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
     const [result] = await db.query('DELETE FROM clients WHERE id = ? AND admin_id = ?', [id, currentAdminId]);
-    
+
     if (result.affectedRows === 0) {
       return res.status(403).json({ success: false, message: 'Unauthorized or client not found' });
     }
-    
+
     res.json({ success: true, message: 'Client deleted successfully' });
   } catch (err) {
     console.error('deleteClient error:', err.message);
@@ -286,14 +242,14 @@ exports.uploadDocument = async (req, res) => {
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
     if (!client_id) {
+      fs.unlinkSync(req.file.path);
       return res.status(400).json({ success: false, message: 'Client ID is required' });
     }
 
-    // Verify client exists and belongs to current admin
     const [clientRows] = await db.query('SELECT id FROM clients WHERE id = ? AND admin_id = ?', [client_id, currentAdminId]);
-    
+
     if (clientRows.length === 0) {
-      fs.unlinkSync(req.file.path); // Delete uploaded file
+      fs.unlinkSync(req.file.path);
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
 
@@ -301,27 +257,15 @@ exports.uploadDocument = async (req, res) => {
     const doc_type = path.extname(req.file.originalname).substring(1).toUpperCase();
     const file_path = `/uploads/client-documents/${req.file.filename}`;
 
-    const query = `INSERT INTO client_documents (client_id, doc_name, doc_type, file_path, uploaded_by, admin_id, created_at) 
+    const query = `INSERT INTO client_documents (client_id, doc_name, doc_type, file_path, uploaded_by, admin_id, created_at)
                    VALUES (?, ?, ?, ?, ?, ?, NOW())`;
-    
-    const [result] = await db.query(query, [
-      client_id,
-      doc_name,
-      doc_type,
-      file_path,
-      req.user.id,
-      currentAdminId
-    ]);
 
-    res.status(201).json({ 
-      success: true, 
+    const [result] = await db.query(query, [client_id, doc_name, doc_type, file_path, req.user.id, currentAdminId]);
+
+    res.status(201).json({
+      success: true,
       message: 'Document uploaded successfully',
-      data: { 
-        id: result.insertId,
-        doc_name,
-        doc_type,
-        file_path
-      }
+      data: { id: result.insertId, doc_name, doc_type, file_path }
     });
   } catch (err) {
     console.error('uploadDocument error:', err.message);
@@ -337,19 +281,17 @@ exports.deleteDocument = async (req, res) => {
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
     const [docRows] = await db.query('SELECT file_path FROM client_documents WHERE id = ? AND admin_id = ?', [doc_id, currentAdminId]);
-    
+
     if (docRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Document not found' });
     }
 
     const filePath = path.join(__dirname, '..', docRows[0].file_path);
-    
-    // Delete file from storage
+
     if (fs.existsSync(filePath)) {
       fs.unlinkSync(filePath);
     }
 
-    // Delete from database
     await db.query('DELETE FROM client_documents WHERE id = ? AND admin_id = ?', [doc_id, currentAdminId]);
 
     res.json({ success: true, message: 'Document deleted successfully' });
@@ -370,32 +312,19 @@ exports.addNote = async (req, res) => {
       return res.status(400).json({ success: false, message: 'Client ID and note are required' });
     }
 
-    // Verify client exists
     const [clientRows] = await db.query('SELECT id FROM clients WHERE id = ? AND admin_id = ?', [client_id, currentAdminId]);
-    
+
     if (clientRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
 
-    const query = `INSERT INTO client_notes (client_id, note, created_by, admin_id, created_at) 
-                   VALUES (?, ?, ?, ?, NOW())`;
-    
-    const [result] = await db.query(query, [
-      client_id,
-      note,
-      req.user.id,
-      currentAdminId
-    ]);
+    const query = `INSERT INTO client_notes (client_id, note, created_by, admin_id, created_at) VALUES (?, ?, ?, ?, NOW())`;
+    const [result] = await db.query(query, [client_id, note, req.user.id, currentAdminId]);
 
-    res.status(201).json({ 
-      success: true, 
+    res.status(201).json({
+      success: true,
       message: 'Note added successfully',
-      data: { 
-        id: result.insertId,
-        client_id,
-        note,
-        created_by: req.user.id
-      }
+      data: { id: result.insertId, client_id, note, created_by: req.user.id }
     });
   } catch (err) {
     console.error('addNote error:', err.message);
@@ -411,7 +340,7 @@ exports.deleteNote = async (req, res) => {
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
     const [result] = await db.query('DELETE FROM client_notes WHERE id = ? AND admin_id = ?', [note_id, currentAdminId]);
-    
+
     if (result.affectedRows === 0) {
       return res.status(403).json({ success: false, message: 'Unauthorized or note not found' });
     }
@@ -430,9 +359,8 @@ exports.getClientDocuments = async (req, res) => {
     const isAdmin = req.user.role === 'admin';
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
-    // Verify client exists
     const [clientRows] = await db.query('SELECT id FROM clients WHERE id = ? AND admin_id = ?', [client_id, currentAdminId]);
-    
+
     if (clientRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
@@ -453,9 +381,8 @@ exports.getClientNotes = async (req, res) => {
     const isAdmin = req.user.role === 'admin';
     const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
 
-    // Verify client exists
     const [clientRows] = await db.query('SELECT id FROM clients WHERE id = ? AND admin_id = ?', [client_id, currentAdminId]);
-    
+
     if (clientRows.length === 0) {
       return res.status(404).json({ success: false, message: 'Client not found' });
     }
@@ -470,21 +397,19 @@ exports.getClientNotes = async (req, res) => {
 };
 
 // ===== ROUTES =====
-router.get('/stats', authMiddleware, exports.getClientsStats);
-router.get('/', authMiddleware, exports.getAllClients);
-router.get('/:id', authMiddleware, exports.getClient);
-router.post('/', authMiddleware, exports.addClient);
-router.put('/:id', authMiddleware, exports.updateClient);
-router.delete('/:id', authMiddleware, exports.deleteClient);
+router.get('/stats', protect, exports.getClientsStats);
+router.get('/', protect, exports.getAllClients);
+router.get('/:id', protect, exports.getClient);
+router.post('/', protect, exports.addClient);
+router.put('/:id', protect, exports.updateClient);
+router.delete('/:id', protect, exports.deleteClient);
 
-// Document routes
-router.post('/upload-document', authMiddleware, upload.single('document'), exports.uploadDocument);
-router.get('/documents/:client_id', authMiddleware, exports.getClientDocuments);
-router.delete('/documents/:doc_id', authMiddleware, exports.deleteDocument);
+router.post('/upload-document', protect, upload.single('document'), exports.uploadDocument);
+router.get('/documents/:client_id', protect, exports.getClientDocuments);
+router.delete('/documents/:doc_id', protect, exports.deleteDocument);
 
-// Notes routes
-router.post('/notes', authMiddleware, exports.addNote);
-router.get('/notes/:client_id', authMiddleware, exports.getClientNotes);
-router.delete('/notes/:note_id', authMiddleware, exports.deleteNote);
+router.post('/notes', protect, exports.addNote);
+router.get('/notes/:client_id', protect, exports.getClientNotes);
+router.delete('/notes/:note_id', protect, exports.deleteNote);
 
 module.exports = router;

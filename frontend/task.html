@@ -6,6 +6,7 @@
   <title>LeadsPro — Tasks</title>
   <link rel="icon" type="image/png" href="logosrbg.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="sidebar.js"></script>
   <style>
     .task-card{background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);margin-bottom:12px;border-left:4px solid #E5E7EB;transition:box-shadow 0.2s;}
@@ -14,8 +15,10 @@
     .task-card.priority-Medium{border-left-color:#F59E0B;}
     .task-card.priority-Low{border-left-color:#10B981;}
     .task-card.done-card{opacity:0.55;}
-    .filter-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:white;color:#6B7280;transition:all 0.2s;}
+    .filter-btn{padding:7px 16px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:white;color:#6B7280;transition:all 0.2s;white-space:nowrap;}
     .filter-btn.active{background:#6C3EF4;border-color:#6C3EF4;color:white;}
+    .tab-btn{padding:9px 18px;border:none;background:transparent;font-size:13px;font-weight:700;color:#9CA3AF;cursor:pointer;border-bottom:2.5px solid transparent;transition:all 0.2s;white-space:nowrap;}
+    .tab-btn.active{color:#6C3EF4;border-bottom-color:#6C3EF4;}
     .stat-mini{background:white;border-radius:14px;padding:16px 20px;box-shadow:0 1px 6px rgba(0,0,0,0.06);display:flex;align-items:center;gap:14px;}
     .modal-box{background:white;border-radius:20px;padding:28px;width:100%;max-width:500px;max-height:90vh;overflow-y:auto;}
     .modal-box label{font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;display:block;margin-bottom:5px;margin-top:12px;}
@@ -30,36 +33,47 @@
     .priority-badge-High{background:#FEE2E2;color:#991B1B;}
     .priority-badge-Medium{background:#FEF3C7;color:#92400E;}
     .priority-badge-Low{background:#D1FAE5;color:#065F46;}
+    .recur-badge-Daily{background:#DBEAFE;color:#1E40AF;}
+    .recur-badge-Weekly{background:#EDE9FE;color:#6C3EF4;}
+    .recur-badge-Monthly{background:#FCE7F3;color:#BE185D;}
+    .recur-badge-Once{background:#F3F4F6;color:#6B7280;}
     .empty-state{text-align:center;padding:60px 20px;color:#9CA3AF;}
+    .chart-panel{background:white;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,0.06);overflow:hidden;}
+    .chart-panel-header{padding:14px 16px;border-bottom:1px solid #F3F4F6;font-size:15px;font-weight:700;color:#111827;}
+    .legend-row{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid #F9FAFB;}
+    .legend-row:last-child{border-bottom:none;}
+    .progress-bar-wrap{background:#F3F4F6;border-radius:20px;height:6px;flex:1;margin:0 10px;overflow:hidden;}
+    .progress-bar-fill{height:6px;border-radius:20px;transition:width 0.5s;}
   </style>
 </head>
 <body>
   <div id="toast" class="toast"></div>
   <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
 
-  <!-- Add Task Modal (Admin Only) -->
+  <!-- Add Task Modal -->
   <div class="modal-bg" id="addModal" style="display:none;">
     <div class="modal-box">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
         <h2 style="font-size:18px;font-weight:800;color:#111827;">✅ Create New Task</h2>
         <button onclick="closeModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9CA3AF;">✕</button>
       </div>
-
       <label>Task Title *</label>
       <input type="text" id="t_title" class="inp" placeholder="e.g. Call Rahul about demo today"/>
-
       <label>Description</label>
       <textarea id="t_desc" placeholder="Add task details..."></textarea>
-
       <label>Assign To *</label>
-      <select id="t_user">
-        <option value="">Select User</option>
-      </select>
-
+      <select id="t_user"><option value="">Select User</option></select>
       <label>Related Lead</label>
-      <select id="t_lead">
-        <option value="">None</option>
+      <select id="t_lead"><option value="">None</option></select>
+
+      <label>Repeat *</label>
+      <select id="t_recurrence" onchange="onRecurrenceChange()">
+        <option value="Once">📌 One-time (single task)</option>
+        <option value="Daily">🔁 Daily (repeats every day)</option>
+        <option value="Weekly">🔁 Weekly (repeats every week)</option>
+        <option value="Monthly">🔁 Monthly (repeats every month)</option>
       </select>
+      <p id="recurHint" style="font-size:11px;color:#9CA3AF;margin-top:4px;"></p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
         <div>
@@ -71,11 +85,10 @@
           </select>
         </div>
         <div>
-          <label>Due Date *</label>
+          <label id="dueLabel">Due Date *</label>
           <input type="date" id="t_due" class="inp" style="margin-top:0;"/>
         </div>
       </div>
-
       <div style="display:flex;gap:10px;margin-top:20px;">
         <button onclick="closeModal()" style="flex:1;background:#F3F4F6;color:#374151;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
         <button onclick="saveTask()" style="flex:2;background:#6C3EF4;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(108,62,244,0.3);">✅ Create Task</button>
@@ -92,14 +105,14 @@
         <!-- Top Bar -->
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:10px;">
           <div>
-            <h1 style="font-size:20px;font-weight:800;color:#111827;">📋 Task Manager</h1>
+            <h1 style="font-size:20px;font-weight:800;color:#111827;">Task Manager</h1>
             <p style="color:#6B7280;font-size:13px;margin-top:3px;" id="taskSubtitle">Assign and track tasks for your team</p>
           </div>
           <button id="addTaskBtn" onclick="openModal()" style="display:none;background:#6C3EF4;color:white;border:none;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(108,62,244,0.3);">+ New Task</button>
         </div>
 
         <!-- Stat Cards -->
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:20px;" id="statsRow">
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;" id="statsRow">
           <div class="stat-mini">
             <div style="width:40px;height:40px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
               <svg width="18" height="18" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -127,14 +140,93 @@
               <div style="font-size:26px;font-weight:800;color:#111827;" id="stat-done">0</div>
             </div>
           </div>
+          <div class="stat-mini">
+            <div style="width:40px;height:40px;border-radius:12px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+              <svg width="18" height="18" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            </div>
+            <div>
+              <div style="font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;">Overdue</div>
+              <div style="font-size:26px;font-weight:800;color:#EF4444;" id="stat-overdue">0</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Charts Row -->
+        <div style="display:grid;grid-template-columns:260px 1fr;gap:14px;margin-bottom:20px;" id="chartGrid">
+          <div class="chart-panel">
+            <div class="chart-panel-header">📊 Task Status</div>
+            <div style="padding:20px;height:180px;position:relative;">
+              <canvas id="statusChart"></canvas>
+            </div>
+            <div style="padding:4px 16px 16px;">
+              <div class="legend-row">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:#6C3EF4;"></div><span style="font-size:12px;color:#6B7280;">Pending</span></div>
+                <span style="font-size:12px;font-weight:700;color:#111827;" id="leg-pending">0</span>
+              </div>
+              <div class="legend-row">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:#10B981;"></div><span style="font-size:12px;color:#6B7280;">Completed</span></div>
+                <span style="font-size:12px;font-weight:700;color:#111827;" id="leg-completed">0</span>
+              </div>
+              <div class="legend-row">
+                <div style="display:flex;align-items:center;gap:6px;"><div style="width:10px;height:10px;border-radius:50%;background:#EF4444;"></div><span style="font-size:12px;color:#6B7280;">Overdue</span></div>
+                <span style="font-size:12px;font-weight:700;color:#111827;" id="leg-overdue">0</span>
+              </div>
+            </div>
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
+            <div class="chart-panel">
+              <div class="chart-panel-header">🎯 Priority Breakdown</div>
+              <div style="padding:16px;">
+                <div style="margin-bottom:14px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                    <span style="font-size:12px;color:#6B7280;font-weight:600;">🔴 High</span>
+                    <span style="font-size:12px;font-weight:700;color:#111827;" id="pri-high-count">0</span>
+                  </div>
+                  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pri-high-bar" style="background:#EF4444;width:0%;"></div></div>
+                </div>
+                <div style="margin-bottom:14px;">
+                  <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                    <span style="font-size:12px;color:#6B7280;font-weight:600;">🟡 Medium</span>
+                    <span style="font-size:12px;font-weight:700;color:#111827;" id="pri-med-count">0</span>
+                  </div>
+                  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pri-med-bar" style="background:#F59E0B;width:0%;"></div></div>
+                </div>
+                <div>
+                  <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                    <span style="font-size:12px;color:#6B7280;font-weight:600;">🟢 Low</span>
+                    <span style="font-size:12px;font-weight:700;color:#111827;" id="pri-low-count">0</span>
+                  </div>
+                  <div class="progress-bar-wrap"><div class="progress-bar-fill" id="pri-low-bar" style="background:#10B981;width:0%;"></div></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="chart-panel">
+              <div class="chart-panel-header">👥 User Performance</div>
+              <div style="padding:16px;overflow-y:auto;max-height:180px;" id="userPerf">
+                <div style="text-align:center;color:#9CA3AF;font-size:13px;padding:20px 0;">No tasks yet</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recurrence Tabs -->
+        <div style="display:flex;gap:4px;overflow-x:auto;margin-bottom:14px;background:white;border-radius:12px;padding:4px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+          <button class="tab-btn active" onclick="setRecurTab('All',this)">All</button>
+          <button class="tab-btn" onclick="setRecurTab('Daily',this)">📅 Daily</button>
+          <button class="tab-btn" onclick="setRecurTab('Weekly',this)">🗓️ Weekly</button>
+          <button class="tab-btn" onclick="setRecurTab('Monthly',this)">📆 Monthly</button>
+          <button class="tab-btn" onclick="setRecurTab('Once',this)">📌 One-time</button>
         </div>
 
         <!-- Filter Bar -->
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
-          <button class="filter-btn active" onclick="filterTasks('All',this)">All</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;overflow-x:auto;">
+          <button class="filter-btn active" onclick="filterTasks('All',this)">All Status</button>
           <button class="filter-btn" onclick="filterTasks('Pending',this)">⏳ Pending</button>
           <button class="filter-btn" onclick="filterTasks('Completed',this)">✅ Completed</button>
           <button class="filter-btn" onclick="filterTasks('High',this)">🔴 High Priority</button>
+          <button class="filter-btn" onclick="filterTasks('Overdue',this)">⚠️ Overdue</button>
         </div>
 
         <!-- Task List -->
@@ -143,9 +235,10 @@
       </div>
     </div>
   </div>
-  <div style="position: fixed; bottom: 20px; right: 30px; z-index: 9999; color: #7c3aed; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;">
-    Powered By VIPPROW
-</div>
+
+  <div style="position:fixed;bottom:20px;right:30px;z-index:9999;color:#7c3aed;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;">
+    Powered By <a href="https://vipprow.com/" target="_blank" rel="noopener noreferrer"><b>VIPPROW</b></a>
+  </div>
 
   <script>
     injectCommonStyles();
@@ -167,13 +260,83 @@
     function getInitials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
     function getColor(n){return avColors[(n||'A').charCodeAt(0)%avColors.length];}
 
-    // ── Storage key per company ──
-    const companyKey = `lp_tasks_${user.company_id || 'default'}`;
+    const companyKey   = `lp_tasks_${user.company_id || 'default'}`;
+    const templateKey  = `lp_task_templates_${user.company_id || 'default'}`;
+
+    // tasks = actual occurrences (what shows in the list, gets marked done)
     let tasks = JSON.parse(localStorage.getItem(companyKey) || '[]');
+    // templates = recurring task definitions (used to generate new occurrences)
+    let templates = JSON.parse(localStorage.getItem(templateKey) || '[]');
+
     let allUsers = [], allLeads = [];
     let currentFilter = 'All';
+    let currentRecurTab = 'All';
+    let statusChartInstance = null;
 
     function saveTasks(){ localStorage.setItem(companyKey, JSON.stringify(tasks)); }
+    function saveTemplates(){ localStorage.setItem(templateKey, JSON.stringify(templates)); }
+
+    // ── Date Helpers ──
+    function todayStr(){ return new Date().toISOString().split('T')[0]; }
+    function isoWeekKey(d){
+      const date = new Date(d);
+      date.setHours(0,0,0,0);
+      date.setDate(date.getDate() - date.getDay()); // Sunday start
+      return date.toISOString().split('T')[0];
+    }
+    function monthKey(d){
+      const date = new Date(d);
+      return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+    }
+
+    // ── Generate Occurrences from Templates ──
+    // For Daily/Weekly/Monthly templates, check if today's/this-week's/this-month's
+    // occurrence already exists in `tasks`; if not, create a new Pending one.
+    function generateOccurrences(){
+      const now = new Date();
+      let changed = false;
+
+      templates.forEach(tpl => {
+        if (tpl.recurrence === 'Once') return; // one-time tasks don't regenerate
+
+        let periodKey;
+        if (tpl.recurrence === 'Daily')   periodKey = todayStr();
+        if (tpl.recurrence === 'Weekly')  periodKey = isoWeekKey(now);
+        if (tpl.recurrence === 'Monthly') periodKey = monthKey(now);
+
+        const exists = tasks.some(t => t.templateId === tpl.id && t.periodKey === periodKey);
+        if (!exists) {
+          // compute due date for this occurrence
+          let due;
+          if (tpl.recurrence === 'Daily')   due = todayStr();
+          if (tpl.recurrence === 'Weekly') {
+            const d = new Date(); d.setDate(d.getDate() + (6 - d.getDay())); // due end of this week (Sat)
+            due = d.toISOString().split('T')[0];
+          }
+          if (tpl.recurrence === 'Monthly') {
+            const d = new Date(now.getFullYear(), now.getMonth()+1, 0); // last day of month
+            due = d.toISOString().split('T')[0];
+          }
+
+          tasks.unshift({
+            id: Date.now() + Math.floor(Math.random()*1000),
+            templateId: tpl.id,
+            periodKey,
+            title: tpl.title, desc: tpl.desc,
+            userId: tpl.userId, userName: tpl.userName,
+            leadId: tpl.leadId, leadName: tpl.leadName,
+            priority: tpl.priority, recurrence: tpl.recurrence,
+            due,
+            status: 'Pending', completedAt: null,
+            createdBy: tpl.createdBy,
+            createdAt: new Date().toISOString()
+          });
+          changed = true;
+        }
+      });
+
+      if (changed) saveTasks();
+    }
 
     // ── Load Dropdowns ──
     async function loadDropdowns(){
@@ -214,62 +377,111 @@
       document.getElementById('t_user').value='';
       document.getElementById('t_lead').value='';
       document.getElementById('t_priority').value='Medium';
+      document.getElementById('t_recurrence').value='Once';
       document.getElementById('t_due').value='';
+      onRecurrenceChange();
       document.getElementById('addModal').style.display='flex';
     }
     function closeModal(){ document.getElementById('addModal').style.display='none'; }
     document.getElementById('addModal').addEventListener('click',function(e){if(e.target===this)closeModal();});
 
-    // ── Save Task ──
+    function onRecurrenceChange(){
+      const r = document.getElementById('t_recurrence').value;
+      const hint = document.getElementById('recurHint');
+      const dueLabel = document.getElementById('dueLabel');
+      const dueInput = document.getElementById('t_due');
+
+      if (r === 'Once') {
+        hint.textContent = 'This task will be created exactly once.';
+        dueLabel.textContent = 'Due Date *';
+        dueInput.style.display = 'block';
+      } else if (r === 'Daily') {
+        hint.textContent = '🔁 A new pending task will appear automatically every day.';
+        dueLabel.textContent = 'Due Date (not needed)';
+        dueInput.style.display = 'none';
+      } else if (r === 'Weekly') {
+        hint.textContent = '🔁 A new pending task will appear automatically every week (due every Saturday).';
+        dueLabel.textContent = 'Due Date (not needed)';
+        dueInput.style.display = 'none';
+      } else if (r === 'Monthly') {
+        hint.textContent = '🔁 A new pending task will appear automatically every month (due on last day).';
+        dueLabel.textContent = 'Due Date (not needed)';
+        dueInput.style.display = 'none';
+      }
+    }
+
+    // ── Save Task (creates a template if recurring, or a single task if Once) ──
     function saveTask(){
-      const title    = document.getElementById('t_title').value.trim();
-      const desc     = document.getElementById('t_desc').value.trim();
-      const userId   = document.getElementById('t_user').value;
-      const leadId   = document.getElementById('t_lead').value;
-      const priority = document.getElementById('t_priority').value;
-      const due      = document.getElementById('t_due').value;
+      const title      = document.getElementById('t_title').value.trim();
+      const desc        = document.getElementById('t_desc').value.trim();
+      const userId      = document.getElementById('t_user').value;
+      const leadId      = document.getElementById('t_lead').value;
+      const priority    = document.getElementById('t_priority').value;
+      const recurrence  = document.getElementById('t_recurrence').value;
+      const due         = document.getElementById('t_due').value;
 
       if(!title){ showToast('⚠️ Task title required!','err'); return; }
       if(!userId){ showToast('⚠️ Please assign to a user!','err'); return; }
-      if(!due){ showToast('⚠️ Due date required!','err'); return; }
+      if(recurrence === 'Once' && !due){ showToast('⚠️ Due date required for one-time task!','err'); return; }
 
       const userName = allUsers.find(u=>String(u.id)===String(userId))?.name || 'Unknown';
       const leadName = allLeads.find(l=>String(l.id)===String(leadId))?.name || null;
 
-      tasks.unshift({
-        id: Date.now(),
-        title, desc, userId, userName,
-        leadId: leadId||null, leadName,
-        priority, due,
-        status: 'Pending',
-        completedAt: null,
-        createdBy: user.name || 'Admin',
-        createdAt: new Date().toISOString()
-      });
-      saveTasks(); updateStats(); renderTasks();
+      if (recurrence === 'Once') {
+        tasks.unshift({
+          id: Date.now(), templateId: null, periodKey: null,
+          title, desc, userId, userName,
+          leadId: leadId||null, leadName, priority, recurrence: 'Once', due,
+          status: 'Pending', completedAt: null,
+          createdBy: user.name || 'Admin',
+          createdAt: new Date().toISOString()
+        });
+        saveTasks();
+      } else {
+        const tpl = {
+          id: Date.now(),
+          title, desc, userId, userName,
+          leadId: leadId||null, leadName, priority, recurrence,
+          createdBy: user.name || 'Admin',
+          createdAt: new Date().toISOString()
+        };
+        templates.push(tpl);
+        saveTemplates();
+        generateOccurrences(); // immediately create today's/this-week's/this-month's occurrence
+      }
+
+      updateDashboard(); renderTasks();
       closeModal();
-      showToast('✅ Task created and assigned!','ok');
+      showToast(recurrence === 'Once' ? '✅ Task created!' : `✅ ${recurrence} recurring task set up!`,'ok');
     }
 
-    // ── Mark Done (User action) ──
+    // ── Mark Done ──
     function markDone(id){
       const t = tasks.find(t=>t.id===id);
       if(!t || t.status==='Completed') return;
       t.status = 'Completed';
       t.completedAt = new Date().toISOString();
-      saveTasks(); updateStats(); renderTasks();
+      saveTasks(); updateDashboard(); renderTasks();
       showToast('✅ Task marked as completed!','ok');
     }
 
-    // ── Delete (Admin only) ──
+    // ── Delete (deletes occurrence; if it's from a template, also offer to stop recurrence) ──
     function deleteTask(id){
-      if(!confirm('Delete this task?')) return;
-      tasks = tasks.filter(t=>t.id!==id);
-      saveTasks(); updateStats(); renderTasks();
+      const t = tasks.find(t=>t.id===id);
+      if(!t) return;
+      if (t.templateId) {
+        if(!confirm('This is a recurring task. Delete this occurrence AND stop future repeats?')) return;
+        templates = templates.filter(tp => tp.id !== t.templateId);
+        saveTemplates();
+      } else {
+        if(!confirm('Delete this task?')) return;
+      }
+      tasks = tasks.filter(x=>x.id!==id);
+      saveTasks(); updateDashboard(); renderTasks();
       showToast('🗑️ Task deleted','ok');
     }
 
-    // ── Filter ──
+    // ── Filters ──
     function filterTasks(f, btn){
       currentFilter = f;
       document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
@@ -277,25 +489,117 @@
       renderTasks();
     }
 
-    // ── Stats ──
-    function updateStats(){
-      const myTasks = isAdmin ? tasks : tasks.filter(t=>String(t.userId)===String(user.id));
-      document.getElementById('stat-total').textContent   = myTasks.length;
-      document.getElementById('stat-pending').textContent = myTasks.filter(t=>t.status==='Pending').length;
-      document.getElementById('stat-done').textContent    = myTasks.filter(t=>t.status==='Completed').length;
+    function setRecurTab(r, btn){
+      currentRecurTab = r;
+      document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTasks();
     }
 
-    // ── Render ──
+    // ── Update Dashboard Charts ──
+    function updateDashboard(){
+      const myTasks = isAdmin ? tasks : tasks.filter(t=>String(t.userId)===String(user.id));
+      const now = new Date();
+
+      const total     = myTasks.length;
+      const pending   = myTasks.filter(t=>t.status==='Pending').length;
+      const completed = myTasks.filter(t=>t.status==='Completed').length;
+      const overdue   = myTasks.filter(t=>t.status!=='Completed' && new Date(t.due)<now).length;
+      const high      = myTasks.filter(t=>t.priority==='High').length;
+      const medium    = myTasks.filter(t=>t.priority==='Medium').length;
+      const low       = myTasks.filter(t=>t.priority==='Low').length;
+
+      document.getElementById('stat-total').textContent   = total;
+      document.getElementById('stat-pending').textContent = pending;
+      document.getElementById('stat-done').textContent    = completed;
+      document.getElementById('stat-overdue').textContent = overdue;
+
+      document.getElementById('leg-pending').textContent   = pending;
+      document.getElementById('leg-completed').textContent = completed;
+      document.getElementById('leg-overdue').textContent   = overdue;
+
+      const ctx = document.getElementById('statusChart').getContext('2d');
+      if(statusChartInstance) statusChartInstance.destroy();
+      statusChartInstance = new Chart(ctx, {
+        type: 'doughnut',
+        data:{
+          labels:['Pending','Completed','Overdue'],
+          datasets:[{
+            data: total===0 ? [1,1,1] : [pending, completed, overdue],
+            backgroundColor:['#6C3EF4','#10B981','#EF4444'],
+            borderWidth:3,
+            borderColor:'#ffffff',
+            hoverOffset:6
+          }]
+        },
+        options:{
+          responsive:true, maintainAspectRatio:false, cutout:'70%',
+          plugins:{
+            legend:{display:false},
+            tooltip:{callbacks:{label:ctx=>`${ctx.label}: ${total===0?0:ctx.raw}`}}
+          }
+        }
+      });
+
+      const maxP = Math.max(high, medium, low, 1);
+      document.getElementById('pri-high-count').textContent = high;
+      document.getElementById('pri-med-count').textContent  = medium;
+      document.getElementById('pri-low-count').textContent  = low;
+      document.getElementById('pri-high-bar').style.width = `${(high/maxP)*100}%`;
+      document.getElementById('pri-med-bar').style.width  = `${(medium/maxP)*100}%`;
+      document.getElementById('pri-low-bar').style.width  = `${(low/maxP)*100}%`;
+
+      if(isAdmin){
+        const userMap = {};
+        myTasks.forEach(t=>{
+          if(!userMap[t.userName]) userMap[t.userName] = {total:0, done:0};
+          userMap[t.userName].total++;
+          if(t.status==='Completed') userMap[t.userName].done++;
+        });
+        const perfEl = document.getElementById('userPerf');
+        const entries = Object.entries(userMap);
+        if(entries.length===0){
+          perfEl.innerHTML='<div style="text-align:center;color:#9CA3AF;font-size:13px;padding:20px 0;">No tasks yet</div>';
+        } else {
+          perfEl.innerHTML = entries.map(([name, d])=>{
+            const pct = d.total>0 ? Math.round((d.done/d.total)*100) : 0;
+            return `
+            <div style="margin-bottom:12px;">
+              <div style="display:flex;justify-content:space-between;margin-bottom:4px;">
+                <div style="display:flex;align-items:center;gap:6px;">
+                  <div class="avatar" style="width:22px;height:22px;font-size:8px;border-radius:6px;background:${getColor(name)}">${getInitials(name)}</div>
+                  <span style="font-size:12px;font-weight:600;color:#111827;">${name}</span>
+                </div>
+                <span style="font-size:11px;color:#6B7280;">${d.done}/${d.total} · ${pct}%</span>
+              </div>
+              <div class="progress-bar-wrap"><div class="progress-bar-fill" style="background:#6C3EF4;width:${pct}%;"></div></div>
+            </div>`;
+          }).join('');
+        }
+      }
+    }
+
+    // ── Render Tasks ──
     function renderTasks(){
-      // Admin sees all tasks, users see only their own
+      const now = new Date();
       let visible = isAdmin ? tasks : tasks.filter(t=>String(t.userId)===String(user.id));
+
+      if (currentRecurTab !== 'All') {
+        visible = visible.filter(t => (t.recurrence || 'Once') === currentRecurTab);
+      }
 
       if(currentFilter==='High') visible = visible.filter(t=>t.priority==='High');
       else if(currentFilter==='Pending') visible = visible.filter(t=>t.status==='Pending');
       else if(currentFilter==='Completed') visible = visible.filter(t=>t.status==='Completed');
+      else if(currentFilter==='Overdue') visible = visible.filter(t=>t.status!=='Completed' && new Date(t.due)<now);
+
+      // sort: pending first, then by due date
+      visible = [...visible].sort((a,b)=>{
+        if (a.status !== b.status) return a.status === 'Pending' ? -1 : 1;
+        return new Date(a.due) - new Date(b.due);
+      });
 
       const list = document.getElementById('taskList');
-
       if(visible.length===0){
         list.innerHTML=`<div class="empty-state">
           <svg width="48" height="48" fill="none" stroke="#D1D5DB" stroke-width="1.5" viewBox="0 0 24 24" style="margin:0 auto 16px;display:block;"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
@@ -305,77 +609,74 @@
         return;
       }
 
-      const priorityColor = {High:'#EF4444', Medium:'#F59E0B', Low:'#10B981'};
-
       list.innerHTML = visible.map(t=>{
-        const isOverdue = t.status!=='Completed' && new Date(t.due) < new Date();
+        const isOverdue = t.status!=='Completed' && new Date(t.due)<now;
         const dueFmt = new Date(t.due).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
         const completedFmt = t.completedAt ? new Date(t.completedAt).toLocaleDateString('en-IN',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : null;
+        const recur = t.recurrence || 'Once';
+        const recurLabel = recur === 'Once' ? '📌 One-time' : (recur === 'Daily' ? '📅 Daily' : recur === 'Weekly' ? '🗓️ Weekly' : '📆 Monthly');
 
         return `
         <div class="task-card priority-${t.priority} ${t.status==='Completed'?'done-card':''}">
           <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px;">
             <div style="flex:1;">
-
-              <!-- Title + Badges -->
               <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px;">
                 <span style="font-size:14px;font-weight:700;color:#111827;${t.status==='Completed'?'text-decoration:line-through;color:#9CA3AF;':''}">${t.title}</span>
                 <span class="badge priority-badge-${t.priority}" style="font-size:10px;padding:2px 8px;border-radius:20px;">${t.priority}</span>
+                <span class="badge recur-badge-${recur}" style="font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">${recurLabel}</span>
                 ${t.status==='Completed'?'<span style="background:#D1FAE5;color:#065F46;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">✅ Completed</span>':''}
                 ${isOverdue?'<span style="background:#FEE2E2;color:#991B1B;font-size:10px;padding:2px 8px;border-radius:20px;font-weight:600;">⚠️ Overdue</span>':''}
               </div>
-
-              <!-- Description -->
               ${t.desc?`<p style="font-size:12px;color:#6B7280;margin-bottom:8px;line-height:1.5;">${t.desc}</p>`:''}
-
-              <!-- Meta Row -->
               <div style="display:flex;align-items:center;gap:16px;flex-wrap:wrap;">
-                <!-- Assigned To -->
                 <div style="display:flex;align-items:center;gap:6px;">
                   <div class="avatar" style="width:24px;height:24px;font-size:9px;border-radius:6px;background:${getColor(t.userName)}">${getInitials(t.userName)}</div>
                   <span style="font-size:12px;color:#6B7280;font-weight:500;">${t.userName}</span>
                 </div>
-
-                <!-- Lead -->
                 ${t.leadName?`<div style="display:flex;align-items:center;gap:5px;">
                   <svg width="11" height="11" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
                   <span style="font-size:12px;color:#6B7280;">${t.leadName}</span>
                 </div>`:''}
-
-                <!-- Due Date -->
                 <div style="display:flex;align-items:center;gap:5px;margin-left:auto;">
                   <svg width="11" height="11" fill="none" stroke="${isOverdue?'#EF4444':'#9CA3AF'}" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
                   <span style="font-size:12px;color:${isOverdue?'#EF4444':'#9CA3AF'};font-weight:${isOverdue?'600':'400'};">${dueFmt}</span>
                 </div>
               </div>
-
-              <!-- Completed Info -->
               ${completedFmt?`<div style="margin-top:8px;font-size:11px;color:#059669;font-weight:500;">✅ Completed on ${completedFmt}</div>`:''}
-
-              <!-- Created By (Admin view) -->
               ${isAdmin?`<div style="margin-top:4px;font-size:11px;color:#9CA3AF;">Created by ${t.createdBy}</div>`:''}
             </div>
-
-            <!-- Action Buttons -->
             <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0;">
-              ${!isAdmin && t.status!=='Completed' ? `
-                <button class="done-btn" onclick="markDone(${t.id})">✅ Mark Done</button>
-              ` : ''}
-              ${!isAdmin && t.status==='Completed' ? `
-                <button class="done-btn completed" disabled>✅ Done</button>
-              ` : ''}
-              ${isAdmin ? `
-                <button class="delete-btn" onclick="deleteTask(${t.id})">🗑️ Delete</button>
-              ` : ''}
+              ${!isAdmin && t.status!=='Completed'?`<button class="done-btn" onclick="markDone(${t.id})">✅ Mark Done</button>`:''}
+              ${!isAdmin && t.status==='Completed'?`<button class="done-btn completed" disabled>✅ Done</button>`:''}
+              ${isAdmin?`<button class="delete-btn" onclick="deleteTask(${t.id})">🗑️ Delete</button>`:''}
             </div>
           </div>
         </div>`;
       }).join('');
     }
 
+    // ── Responsive ──
+    function fixGrid(){
+      const s = document.getElementById('statsRow');
+      const c = document.getElementById('chartGrid');
+      if(window.innerWidth < 640){
+        s.style.gridTemplateColumns = '1fr 1fr';
+        c.style.gridTemplateColumns = '1fr';
+      } else if(window.innerWidth < 1024){
+        s.style.gridTemplateColumns = 'repeat(2,1fr)';
+        c.style.gridTemplateColumns = '1fr';
+      } else {
+        s.style.gridTemplateColumns = 'repeat(4,1fr)';
+        c.style.gridTemplateColumns = '260px 1fr';
+      }
+    }
+    fixGrid();
+    window.addEventListener('resize', fixGrid);
+
     // ── Init ──
     if(isAdmin) loadDropdowns();
-    updateStats();
+    generateOccurrences();   // create today's/this-week's/this-month's tasks from templates if missing
+    updateDashboard();
     renderTasks();
   </script>
 </body>

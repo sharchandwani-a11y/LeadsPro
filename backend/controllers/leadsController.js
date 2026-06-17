@@ -289,3 +289,46 @@ exports.deleteLead = async (req, res) => {
     res.status(500).json({ success: false, message: err.message });
   }
 };
+// 👤 ASSIGN LEAD - Single
+exports.assignLead = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { assigned_to } = req.body;
+    const isAdmin = req.user.role === 'admin';
+    const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
+
+    const [result] = await db.query(
+      'UPDATE leads SET assigned_to = ? WHERE id = ? AND admin_id = ?',
+      [assigned_to || null, id, currentAdminId]
+    );
+
+    if (result.affectedRows === 0)
+      return res.status(403).json({ success: false, message: 'Unauthorized or lead not found' });
+
+    res.json({ success: true, message: 'Lead Assigned Successfully!' });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};
+
+// 👥 BULK ASSIGN LEADS
+exports.bulkAssignLeads = async (req, res) => {
+  try {
+    const { lead_ids, assigned_to } = req.body;
+    if (!lead_ids || !lead_ids.length)
+      return res.status(400).json({ success: false, message: 'No leads selected!' });
+
+    const isAdmin = req.user.role === 'admin';
+    const currentAdminId = isAdmin ? req.user.id : req.user.admin_id;
+
+    const placeholders = lead_ids.map(() => '?').join(',');
+    const [result] = await db.query(
+      `UPDATE leads SET assigned_to = ? WHERE id IN (${placeholders}) AND admin_id = ?`,
+      [assigned_to || null, ...lead_ids, currentAdminId]
+    );
+
+    res.json({ success: true, message: `${result.affectedRows} leads assigned successfully!` });
+  } catch (err) {
+    res.status(500).json({ success: false, message: err.message });
+  }
+};

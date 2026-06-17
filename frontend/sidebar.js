@@ -52,7 +52,7 @@ function renderSidebar(activePage) {
              onmouseover="this.style.transform='scale(1.02)'"
              onmouseout="this.style.transform='scale(1)'">
           <div style="color:white;font-weight:700;font-size:13px;margin-bottom:3px;">Upgrade Plan 🚀</div>
-          <p style="color:rgba(255,255,255,0.65);font-size:11px;margin-bottom:10px;line-height:1.4;">More features unlock karo</p>
+          <p style="color:rgba(255,255,255,0.65);font-size:11px;margin-bottom:10px;line-height:1.4;">Unlock More Features</p>
           <button style="width:100%;background:white;color:#6C3EF4;font-weight:700;font-size:12px;padding:7px;border-radius:8px;border:none;cursor:pointer;transition:all 0.2s;"
                   onmouseover="this.style.background='#EDE9FE'; this.style.transform='scale(1.02)'"
                   onmouseout="this.style.background='white'; this.style.transform='scale(1)'">

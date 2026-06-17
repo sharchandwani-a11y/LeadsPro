@@ -9,74 +9,91 @@
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
   <script src="sidebar.js"></script>
   <style>
-    .lead-card { background:white; border-radius:14px; box-shadow:0 1px 8px rgba(0,0,0,0.07); margin-bottom:12px; overflow:hidden; transition:box-shadow 0.2s; }
-    .lead-card:hover { box-shadow:0 4px 16px rgba(0,0,0,0.12); }
-    .lead-header { display:flex; align-items:flex-start; justify-content:space-between; padding:14px 16px 10px; cursor:pointer; }
-    .lead-name { font-size:15px; font-weight:700; color:#1a1a2e; display:flex; align-items:center; gap:8px; }
-    .lead-contact { text-align:right; }
-    .lead-contact a { display:flex; align-items:center; gap:5px; font-size:12px; color:#4F46E5; text-decoration:none; font-weight:500; justify-content:flex-end; }
-    .lead-contact a:hover { color:#6C3EF4; }
-    .lead-meta { padding:0 16px 6px; display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
-    .lead-status-bar { padding:6px 16px; background:#F0F4FF; display:flex; align-items:center; justify-content:space-between; }
-    .lead-actions { padding:10px 16px 14px; display:flex; gap:10px; }
-    .btn-reschedule { flex:1; background:#4F46E5; color:white; border:none; padding:10px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; }
-    .btn-reschedule:hover { background:#4338CA; }
-    .btn-call { flex:1; background:#4F46E5; color:white; border:none; padding:10px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; }
-    .btn-call:hover { background:#4338CA; }
-    .btn-whatsapp { flex:1; background:#25D366; color:white; border:none; padding:10px; border-radius:10px; font-size:13px; font-weight:700; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px; transition:all 0.2s; }
-    .btn-whatsapp:hover { background:#20BD5C; }
-    .status-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-    .filter-chip { padding:6px 14px; border-radius:20px; font-size:12px; font-weight:600; cursor:pointer; border:1.5px solid #E5E7EB; background:white; color:#6B7280; transition:all 0.2s; white-space:nowrap; }
-    .filter-chip.active { background:#4F46E5; color:white; border-color:#4F46E5; }
-    .filter-chip:hover { border-color:#4F46E5; color:#4F46E5; }
-    .search-bar { display:flex; align-items:center; gap:8px; background:white; border:1.5px solid #E5E7EB; border-radius:10px; padding:9px 14px; flex:1; }
-    .search-bar input { outline:none; border:none; background:transparent; font-size:14px; width:100%; font-family:'Plus Jakarta Sans',sans-serif; }
-    .search-bar:focus-within { border-color:#4F46E5; }
-    .priority-hot { background:#FEE2E2; color:#EF4444; }
-    .priority-important { background:#FEF3C7; color:#D97706; }
-    .priority-normal { background:#F0FDF4; color:#16A34A; }
+    .lead-card{background:white;border-radius:14px;box-shadow:0 1px 8px rgba(0,0,0,0.07);margin-bottom:12px;overflow:hidden;transition:box-shadow 0.2s;}
+    .lead-card:hover{box-shadow:0 4px 16px rgba(0,0,0,0.12);}
+    .lead-card.selected-card{border:2px solid #4F46E5;box-shadow:0 0 0 3px rgba(79,70,229,0.1);}
+    .lead-header{display:flex;align-items:flex-start;justify-content:space-between;padding:14px 16px 10px;cursor:pointer;}
+    .lead-name{font-size:15px;font-weight:700;color:#1a1a2e;display:flex;align-items:center;gap:8px;}
+    .lead-contact{text-align:right;}
+    .lead-contact a{display:flex;align-items:center;gap:5px;font-size:12px;color:#4F46E5;text-decoration:none;font-weight:500;justify-content:flex-end;}
+    .lead-contact a:hover{color:#6C3EF4;}
+    .lead-status-bar{padding:6px 16px;background:#F0F4FF;display:flex;align-items:center;justify-content:space-between;}
+    .lead-actions{padding:10px 16px 14px;display:flex;gap:10px;}
+    .btn-reschedule{flex:1;background:#4F46E5;color:white;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-reschedule:hover{background:#4338CA;}
+    .btn-call{flex:1;background:#4F46E5;color:white;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-call:hover{background:#4338CA;}
+    .btn-whatsapp{flex:1;background:#25D366;color:white;border:none;padding:10px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;}
+    .btn-whatsapp:hover{background:#20BD5C;}
+    .status-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+    .filter-chip{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;cursor:pointer;border:1.5px solid #E5E7EB;background:white;color:#6B7280;transition:all 0.2s;white-space:nowrap;}
+    .filter-chip.active{background:#4F46E5;color:white;border-color:#4F46E5;}
+    .filter-chip:hover{border-color:#4F46E5;color:#4F46E5;}
+    .search-bar{display:flex;align-items:center;gap:8px;background:white;border:1.5px solid #E5E7EB;border-radius:10px;padding:9px 14px;flex:1;}
+    .search-bar input{outline:none;border:none;background:transparent;font-size:14px;width:100%;font-family:'Plus Jakarta Sans',sans-serif;}
+    .search-bar:focus-within{border-color:#4F46E5;}
+    .lead-details{padding:0 16px 14px;border-top:1px solid #F3F4F6;display:none;}
+    .lead-details.open{display:block;}
+    .detail-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;}
+    .detail-item{background:#F9FAFB;border-radius:8px;padding:8px 12px;flex:1;min-width:140px;}
+    .detail-label{font-size:10px;color:#9CA3AF;font-weight:600;margin-bottom:2px;}
+    .detail-value{font-size:13px;color:#1F2937;font-weight:600;}
+    .bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:white;border-top:1px solid #E5E7EB;padding:8px 0 12px;z-index:100;}
+    .bottom-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;font-size:10px;font-weight:600;color:#9CA3AF;cursor:pointer;text-decoration:none;}
+    .bottom-nav-item.active{color:#4F46E5;}
+    @media(max-width:768px){.bottom-nav{display:flex;}.main-scroll{padding-bottom:80px !important;}}
 
-    /* Bottom Nav Mobile */
-    .bottom-nav { display:none; position:fixed; bottom:0; left:0; right:0; background:white; border-top:1px solid #E5E7EB; padding:8px 0 12px; z-index:100; }
-    .bottom-nav-item { flex:1; display:flex; flex-direction:column; align-items:center; gap:3px; font-size:10px; font-weight:600; color:#9CA3AF; cursor:pointer; text-decoration:none; }
-    .bottom-nav-item.active { color:#4F46E5; }
-    .bottom-nav-item svg { width:22px; height:22px; }
+    /* Bulk Action Bar */
+    .bulk-bar{position:sticky;top:0;z-index:30;background:#4F46E5;color:white;padding:10px 16px;display:none;align-items:center;justify-content:space-between;border-radius:12px;margin-bottom:12px;gap:10px;flex-wrap:wrap;}
+    .bulk-bar.show{display:flex;}
 
-    @media (max-width:768px) {
-      .bottom-nav { display:flex; }
-      .main-scroll { padding-bottom:80px !important; }
-    }
+    /* Assign Modal */
+    .assign-modal-box{background:white;border-radius:20px;padding:28px;width:100%;max-width:420px;}
+    .assign-modal-box label{font-size:11px;color:#6B7280;font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px;}
+    .assign-modal-box select{width:100%;border:1.5px solid #E5E7EB;border-radius:10px;padding:11px 14px;font-size:14px;outline:none;font-family:'Plus Jakarta Sans',sans-serif;}
+    .assign-modal-box select:focus{border-color:#4F46E5;}
 
-    /* Modal */
-    .modal-bg { position:fixed; inset:0; background:rgba(0,0,0,0.5); display:flex; align-items:center; justify-content:center; z-index:50; padding:16px; }
-
-    /* Lead expanded details */
-    .lead-details { padding:0 16px 14px; border-top:1px solid #F3F4F6; display:none; }
-    .lead-details.open { display:block; }
-    .detail-row { display:flex; gap:8px; margin-top:10px; flex-wrap:wrap; }
-    .detail-item { background:#F9FAFB; border-radius:8px; padding:8px 12px; flex:1; min-width:140px; }
-    .detail-label { font-size:10px; color:#9CA3AF; font-weight:600; margin-bottom:2px; }
-    .detail-value { font-size:13px; color:#1F2937; font-weight:600; }
-
-    /* Toast */
-    .toast { position:fixed; top:20px; right:20px; padding:12px 20px; border-radius:10px; font-size:13px; font-weight:600; transform:translateX(150%); transition:transform 0.3s; z-index:999; max-width:300px; }
-    .toast.show { transform:translateX(0); }
-    .toast.ok { background:#D1FAE5; color:#065F46; }
-    .toast.err { background:#FEE2E2; color:#991B1B; }
-    .toast.info { background:#DBEAFE; color:#1E40AF; }
+    /* Checkbox */
+    .lead-checkbox{width:18px;height:18px;accent-color:#4F46E5;cursor:pointer;flex-shrink:0;}
   </style>
 </head>
 <body>
   <div id="toast" class="toast"></div>
   <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
 
+  <!-- ASSIGN MODAL -->
+  <div id="assignModal" class="modal-bg" style="display:none;">
+    <div class="assign-modal-box">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;">
+        <h3 style="font-size:17px;font-weight:800;color:#111827;" id="assignModalTitle">👤 Assign Lead</h3>
+        <button onclick="closeAssignModal()" style="background:none;border:none;font-size:20px;cursor:pointer;color:#9CA3AF;">✕</button>
+      </div>
+      <label>Assign To *</label>
+      <select id="assignUserSelect">
+        <option value="">-- Select Employee --</option>
+      </select>
+      <p id="assignInfo" style="font-size:12px;color:#6B7280;margin-top:8px;"></p>
+      <div style="display:flex;gap:10px;margin-top:20px;">
+        <button onclick="closeAssignModal()" style="flex:1;background:#F3F4F6;color:#374151;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;">Cancel</button>
+        <button onclick="confirmAssign()" style="flex:2;background:#4F46E5;color:white;border:none;padding:12px;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(79,70,229,0.3);">✅ Assign Now</button>
+      </div>
+    </div>
+  </div>
+
   <div class="app-wrapper">
     <aside class="sidebar" id="sidebar"></aside>
-
     <div class="main-col">
       <div id="headerContainer"></div>
-
       <div class="main-scroll">
+
+        <!-- Bulk Action Bar -->
+        <div class="bulk-bar" id="bulkBar">
+          <span id="bulkCount" style="font-size:13px;font-weight:700;">0 selected</span>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;">
+            <button onclick="openBulkAssign()" style="background:white;color:#4F46E5;border:none;padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">👤 Bulk Assign</button>
+            <button onclick="clearSelection()" style="background:rgba(255,255,255,0.2);color:white;border:1px solid rgba(255,255,255,0.4);padding:8px 16px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer;">✕ Clear</button>
+          </div>
+        </div>
 
         <!-- Search + Filter Row -->
         <div style="display:flex;gap:8px;margin-bottom:12px;flex-wrap:wrap;">
@@ -102,7 +119,7 @@
 
         <!-- Source Filter -->
         <div style="display:flex;gap:8px;overflow-x:auto;padding-bottom:8px;margin-bottom:16px;scrollbar-width:none;">
-          <button class="filter-chip active" onclick="setSourceFilter('', this)" id="srcAll">All Sources</button>
+          <button class="filter-chip active" onclick="setSourceFilter('', this)">All Sources</button>
           <button class="filter-chip" onclick="setSourceFilter('Facebook Ads', this)">Facebook Ads</button>
           <button class="filter-chip" onclick="setSourceFilter('Instagram', this)">Instagram</button>
           <button class="filter-chip" onclick="setSourceFilter('Website', this)">Website</button>
@@ -145,14 +162,14 @@
     </div>
   </div>
 
-  <!-- BOTTOM NAV (Mobile) -->
+  <!-- BOTTOM NAV -->
   <nav class="bottom-nav">
     <a href="dashboard.html" class="bottom-nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:22px;height:22px;"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </a>
     <a href="leads.html" class="bottom-nav-item active">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:22px;height:22px;"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
       Leads
     </a>
     <a href="leads.html" class="bottom-nav-item" onclick="openAddModal();return false;" style="background:none;border:none;">
@@ -162,11 +179,11 @@
       Create
     </a>
     <a href="followups.html" class="bottom-nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6z"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:22px;height:22px;"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6z"/></svg>
       FollowUp
     </a>
     <a href="settings.html" class="bottom-nav-item">
-      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+      <svg fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24" style="width:22px;height:22px;"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
       Menu
     </a>
   </nav>
@@ -203,17 +220,23 @@
             <option>New</option><option>Contacted</option><option>Interested</option><option>Follow Up</option><option>Converted</option><option>Lost</option>
           </select>
         </div>
-        <div style="grid-column:span 2;">
+        <div>
           <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">PRIORITY</label>
           <select id="f_priority" class="inp">
             <option value="normal">🟢 Normal</option>
-            <option value="hot">🔴 Hot (Admin Only)</option>
-            <option value="important">⭐ Important (Admin Only)</option>
+            <option value="hot">🔴 Hot</option>
+            <option value="important">⭐ Important</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">ASSIGN TO</label>
+          <select id="f_assigned" class="inp">
+            <option value="">-- Unassigned --</option>
           </select>
         </div>
         <div style="grid-column:span 2;">
           <label style="font-size:11px;font-weight:600;color:#6B7280;display:block;margin-bottom:5px;">NOTES</label>
-          <textarea id="f_notes" class="inp" rows="2" placeholder=" Any Notes..."></textarea>
+          <textarea id="f_notes" class="inp" rows="2" placeholder="Any Notes..."></textarea>
         </div>
       </div>
       <div style="padding:0 20px 20px;display:flex;gap:10px;">
@@ -256,9 +279,10 @@
       </div>
     </div>
   </div>
-  <div style="position: fixed; bottom: 20px; right: 30px; z-index: 9999; color: #7c3aed; font-family: 'Inter', sans-serif; font-size: 14px; font-weight: 600;">
-    Powered By VIPPROW
-</div>
+
+  <div style="position:fixed;bottom:20px;right:30px;z-index:9999;color:#7c3aed;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;">
+    Powered By <a href="https://vipprow.com/" target="_blank"><b>VIPPROW</b></a>
+  </div>
 
   <script>
     injectCommonStyles();
@@ -269,52 +293,78 @@
 
     const token = localStorage.getItem('token');
     const user  = JSON.parse(localStorage.getItem('user')||'{}');
+    const isAdmin = user.role === 'admin';
     if (!token) window.location.href = 'login.html';
 
     let currentPage=1, currentStatus='', currentSource='', currentSearch='', editId=null, importData=[];
     let allLeadsData = [];
+    let allUsers = [];
+    let selectedLeads = new Set(); // Bulk selection
+    let assignMode = null; // 'single' or 'bulk'
+    let singleAssignId = null;
 
     const statusColors = {
-      'New':       { bg:'#EEF2FF', color:'#4F46E5', dot:'#4F46E5' },
-      'Contacted': { bg:'#FFF7ED', color:'#EA580C', dot:'#EA580C' },
-      'Interested':{ bg:'#F0FDF4', color:'#16A34A', dot:'#16A34A' },
-      'Follow Up': { bg:'#FFF1F2', color:'#E11D48', dot:'#E11D48' },
-      'Converted': { bg:'#ECFDF5', color:'#059669', dot:'#059669' },
-      'Lost':      { bg:'#F3F4F6', color:'#6B7280', dot:'#6B7280' },
+      'New':       {bg:'#EEF2FF',color:'#4F46E5',dot:'#4F46E5'},
+      'Contacted': {bg:'#FFF7ED',color:'#EA580C',dot:'#EA580C'},
+      'Interested':{bg:'#F0FDF4',color:'#16A34A',dot:'#16A34A'},
+      'Follow Up': {bg:'#FFF1F2',color:'#E11D48',dot:'#E11D48'},
+      'Converted': {bg:'#ECFDF5',color:'#059669',dot:'#059669'},
+      'Lost':      {bg:'#F3F4F6',color:'#6B7280',dot:'#6B7280'},
     };
 
-    function getStatusStyle(s) { return statusColors[s] || statusColors['New']; }
+    function getStatusStyle(s){return statusColors[s]||statusColors['New'];}
+    function getInitials(n){return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}
+    const avatarColors=['#4F46E5','#EC4899','#0EA5E9','#10B981','#F59E0B','#EF4444'];
+    function getAvatarColor(n){return avatarColors[n.charCodeAt(0)%avatarColors.length];}
+    function formatDate(d){if(!d)return '';const date=new Date(d);return date.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'})+' '+date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}).toUpperCase();}
 
-    function getInitials(n){ return n.split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2); }
-    const avatarColors = ['#4F46E5','#EC4899','#0EA5E9','#10B981','#F59E0B','#EF4444'];
-    function getAvatarColor(n){ return avatarColors[n.charCodeAt(0)%avatarColors.length]; }
-
-    function formatDate(d){
-      if(!d) return '';
-      const date = new Date(d);
-      return date.toLocaleDateString('en-IN',{day:'2-digit',month:'2-digit',year:'numeric'}) + ' ' +
-             date.toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit',hour12:true}).toUpperCase();
+    // ── Load Users for dropdowns ──
+    async function loadUsers(){
+      try{
+        const res = await fetch('https://api.leadspro.tech/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});
+        const data = await res.json();
+        if(data.success && data.data){
+          allUsers = data.data;
+          // Fill Add/Edit modal dropdown
+          const sel = document.getElementById('f_assigned');
+          sel.innerHTML = '<option value="">-- Unassigned --</option>';
+          data.data.forEach(u=>{
+            const o = document.createElement('option');
+            o.value = u.id;
+            o.textContent = `${u.name} (${u.role||'agent'})`;
+            sel.appendChild(o);
+          });
+          // Fill Assign modal dropdown
+          const sel2 = document.getElementById('assignUserSelect');
+          sel2.innerHTML = '<option value="">-- Select Employee --</option>';
+          data.data.forEach(u=>{
+            const o = document.createElement('option');
+            o.value = u.id;
+            o.textContent = `${u.name} (${u.role||'agent'})`;
+            sel2.appendChild(o);
+          });
+        }
+      }catch(e){}
     }
 
-    function renderLeadCard(l) {
+    // ── Render Lead Card ──
+    function renderLeadCard(l){
       const st = getStatusStyle(l.status);
-      const isExpanded = false;
+      const isSelected = selectedLeads.has(l.id);
       return `
-        <div class="lead-card" id="card_${l.id}">
-          <!-- Header -->
-          <div class="lead-header" onclick="toggleCard(${l.id})">
-            <div>
-              <div class="lead-name">
-                <div style="width:32px;height:32px;border-radius:50%;background:${getAvatarColor(l.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;">${getInitials(l.name)}</div>
-                ${l.name}
-                ${l.priority==='hot'?'<span style="background:#FEE2E2;color:#EF4444;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;">🔴 HOT</span>':''}
-                ${l.priority==='important'?'<span style="background:#FEF3C7;color:#D97706;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;">⭐ IMP</span>':''}
-              </div>
-              <div style="font-size:11px;color:#9CA3AF;margin-top:4px;margin-left:40px;">${formatDate(l.created_at)}</div>
-              <div style="margin-left:40px;margin-top:4px;">
-                <span style="font-size:11px;color:${l.status==='Follow Up'?'#EF4444':'#9CA3AF'};font-weight:${l.status==='Follow Up'?'600':'400'};">
-                  ${l.status==='Follow Up'?'⚠️ Follow Up Required':l.status}
-                </span>
+        <div class="lead-card ${isSelected?'selected-card':''}" id="card_${l.id}">
+          <div class="lead-header">
+            <div style="display:flex;align-items:flex-start;gap:10px;flex:1;" onclick="toggleCard(${l.id})">
+              ${isAdmin ? `<input type="checkbox" class="lead-checkbox" id="chk_${l.id}" ${isSelected?'checked':''} onclick="event.stopPropagation();toggleSelect(${l.id})" style="margin-top:6px;"/>` : ''}
+              <div style="width:32px;height:32px;border-radius:50%;background:${getAvatarColor(l.name)};display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:white;flex-shrink:0;">${getInitials(l.name)}</div>
+              <div>
+                <div class="lead-name">
+                  ${l.name}
+                  ${l.priority==='hot'?'<span style="background:#FEE2E2;color:#EF4444;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;">🔴 HOT</span>':''}
+                  ${l.priority==='important'?'<span style="background:#FEF3C7;color:#D97706;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;">⭐ IMP</span>':''}
+                </div>
+                <div style="font-size:11px;color:#9CA3AF;margin-top:3px;">${formatDate(l.created_at)}</div>
+                ${l.assigned_name ? `<div style="font-size:11px;color:#4F46E5;font-weight:600;margin-top:3px;">👤 ${l.assigned_name}</div>` : '<div style="font-size:11px;color:#9CA3AF;margin-top:3px;">👤 Unassigned</div>'}
               </div>
             </div>
             <div class="lead-contact">
@@ -322,10 +372,10 @@
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.69 12 19.79 19.79 0 0 1 1.61 3.18 2 2 0 0 1 3.6 1h3a2 2 0 0 1 2 1.72c.127.96.361 1.903.7 2.81a2 2 0 0 1-.45 2.11L7.91 8.6a16 16 0 0 0 6 6z"/></svg>
                 +91${l.phone}
               </a>
-              ${l.email ? `<a href="mailto:${l.email}" style="margin-top:3px;">
+              ${l.email?`<a href="mailto:${l.email}" style="margin-top:3px;">
                 <svg width="14" height="14" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
                 ${l.email.length>18?l.email.slice(0,18)+'...':l.email}
-              </a>` : ''}
+              </a>`:''}
             </div>
           </div>
 
@@ -333,12 +383,15 @@
           <div class="lead-status-bar">
             <div style="display:flex;align-items:center;gap:6px;">
               <div class="status-dot" style="background:${st.dot};"></div>
-              <span style="font-size:12px;font-weight:600;color:${st.color};">${l.notes || l.source}</span>
+              <span style="font-size:12px;font-weight:600;color:${st.color};">${l.notes||l.source}</span>
               <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="background:none;border:none;cursor:pointer;padding:0;margin-left:4px;">
                 <svg width="13" height="13" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
             </div>
-            <span style="font-size:11px;background:${st.bg};color:${st.color};padding:3px 10px;border-radius:20px;font-weight:600;">${l.source}</span>
+            <div style="display:flex;align-items:center;gap:6px;">
+              ${isAdmin ? `<button onclick="openSingleAssign(${l.id}, '${l.name}')" style="background:#EEF2FF;color:#4F46E5;border:none;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">👤 Assign</button>` : ''}
+              <span style="font-size:11px;background:${st.bg};color:${st.color};padding:3px 10px;border-radius:20px;font-weight:600;">${l.source}</span>
+            </div>
           </div>
 
           <!-- Action Buttons -->
@@ -372,91 +425,162 @@
                 <div class="detail-label">PRIORITY</div>
                 <div class="detail-value">${l.priority==='hot'?'🔴 Hot':l.priority==='important'?'⭐ Important':'🟢 Normal'}</div>
               </div>
+              <div class="detail-item">
+                <div class="detail-label">ASSIGNED TO</div>
+                <div class="detail-value">${l.assigned_name||'Unassigned'}</div>
+              </div>
             </div>
             ${l.notes?`<div style="margin-top:10px;background:#F9FAFB;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#9CA3AF;font-weight:600;margin-bottom:4px;">NOTES</div><div style="font-size:13px;color:#374151;">${l.notes}</div></div>`:''}
             <div style="display:flex;gap:8px;margin-top:10px;">
-              <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="flex:1;background:#EEF2FF;color:#4F46E5;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">✏️ Edit Lead</button>
+              <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="flex:1;background:#EEF2FF;color:#4F46E5;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">✏️ Edit</button>
+              ${isAdmin?`<button onclick="openSingleAssign(${l.id},'${l.name}')" style="flex:1;background:#EDE9FE;color:#7C3AED;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">👤 Assign</button>`:''}
               <button onclick="deleteLead(${l.id})" style="background:#FEE2E2;color:#EF4444;border:none;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">🗑️</button>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }
 
-    function toggleCard(id) {
-      const details = document.getElementById(`details_${id}`);
-      details.classList.toggle('open');
+    function toggleCard(id){
+      document.getElementById(`details_${id}`).classList.toggle('open');
     }
 
-    async function loadLeads() {
-      const params = new URLSearchParams({page:currentPage, limit:10});
-      if (currentStatus) params.append('status', currentStatus);
-      if (currentSource) params.append('source', currentSource);
-      if (currentSearch) params.append('search', currentSearch);
+    // ── Bulk Selection ──
+    function toggleSelect(id){
+      if(selectedLeads.has(id)) selectedLeads.delete(id);
+      else selectedLeads.add(id);
+      updateBulkBar();
+      const card = document.getElementById(`card_${id}`);
+      if(card) card.classList.toggle('selected-card', selectedLeads.has(id));
+    }
 
-      try {
-        const res  = await fetch(`https://api.leadspro.tech/api/leads?${params}`, { headers:{'Authorization':`Bearer ${token}`} });
+    function updateBulkBar(){
+      const bar = document.getElementById('bulkBar');
+      const count = selectedLeads.size;
+      document.getElementById('bulkCount').textContent = `${count} lead${count>1?'s':''} selected`;
+      bar.classList.toggle('show', count > 0);
+    }
+
+    function clearSelection(){
+      selectedLeads.clear();
+      updateBulkBar();
+      document.querySelectorAll('.lead-checkbox').forEach(c=>c.checked=false);
+      document.querySelectorAll('.lead-card').forEach(c=>c.classList.remove('selected-card'));
+    }
+
+    // ── Single Assign ──
+    function openSingleAssign(id, name){
+      assignMode = 'single';
+      singleAssignId = id;
+      document.getElementById('assignModalTitle').textContent = `👤 Assign: ${name}`;
+      document.getElementById('assignInfo').textContent = 'Select employee to assign this lead';
+      document.getElementById('assignUserSelect').value = '';
+      document.getElementById('assignModal').style.display = 'flex';
+    }
+
+    // ── Bulk Assign ──
+    function openBulkAssign(){
+      if(selectedLeads.size === 0){ showToast('⚠️ Koi lead select nahi ki!','err'); return; }
+      assignMode = 'bulk';
+      document.getElementById('assignModalTitle').textContent = `👥 Bulk Assign`;
+      document.getElementById('assignInfo').textContent = `${selectedLeads.size} leads assign hongi`;
+      document.getElementById('assignUserSelect').value = '';
+      document.getElementById('assignModal').style.display = 'flex';
+    }
+
+    function closeAssignModal(){ document.getElementById('assignModal').style.display = 'none'; }
+
+    // ── Confirm Assign ──
+    async function confirmAssign(){
+      const userId = document.getElementById('assignUserSelect').value;
+      if(!userId){ showToast('⚠️ Employee select karo!','err'); return; }
+
+      if(assignMode === 'single'){
+        try{
+          const res = await fetch(`https://api.leadspro.tech/api/leads/${singleAssignId}/assign`,{
+            method:'PUT',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+            body: JSON.stringify({assigned_to: userId})
+          });
+          const data = await res.json();
+          if(data.success){
+            showToast('✅ Lead assigned successfully!','ok');
+            closeAssignModal();
+            loadLeads();
+          } else {
+            showToast('❌ '+data.message,'err');
+          }
+        }catch(e){ showToast('❌ Server error','err'); }
+
+      } else if(assignMode === 'bulk'){
+        try{
+          const res = await fetch('https://api.leadspro.tech/api/leads/bulk-assign',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
+            body: JSON.stringify({lead_ids: Array.from(selectedLeads), assigned_to: userId})
+          });
+          const data = await res.json();
+          if(data.success){
+            showToast('✅ '+data.message,'ok');
+            closeAssignModal();
+            clearSelection();
+            loadLeads();
+          } else {
+            showToast('❌ '+data.message,'err');
+          }
+        }catch(e){ showToast('❌ Server error','err'); }
+      }
+    }
+
+    // ── Load Leads ──
+    async function loadLeads(){
+      const params = new URLSearchParams({page:currentPage,limit:10});
+      if(currentStatus) params.append('status',currentStatus);
+      if(currentSource) params.append('source',currentSource);
+      if(currentSearch) params.append('search',currentSearch);
+      try{
+        const res = await fetch(`https://api.leadspro.tech/api/leads?${params}`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
         const container = document.getElementById('leadsContainer');
-
-        if (data.success) {
+        if(data.success){
           allLeadsData = data.data;
           document.getElementById('pageInfo').textContent = `${data.pagination.total} leads`;
-
-          // Stats
           loadStats();
-
-          if (!data.data.length) {
-            container.innerHTML = `<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">📭</div><p style="color:#9CA3AF;font-weight:600;">No Leads Found</p><button onclick="openAddModal()" style="margin-top:16px;background:#4F46E5;color:white;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Add Lead</button></div>`;
+          if(!data.data.length){
+            container.innerHTML=`<div style="text-align:center;padding:60px 20px;"><div style="font-size:48px;margin-bottom:12px;">📭</div><p style="color:#9CA3AF;font-weight:600;">No Leads Found</p><button onclick="openAddModal()" style="margin-top:16px;background:#4F46E5;color:white;border:none;padding:10px 20px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">+ Add Lead</button></div>`;
             return;
           }
-
-          container.innerHTML = data.data.map(l => renderLeadCard(l)).join('');
+          container.innerHTML = data.data.map(l=>renderLeadCard(l)).join('');
           renderPagination(data.pagination);
         }
-      } catch(e) {
-        document.getElementById('leadsContainer').innerHTML = '<div style="text-align:center;padding:40px;color:#EF4444;">Not Connected with server</div>';
+      }catch(e){
+        document.getElementById('leadsContainer').innerHTML='<div style="text-align:center;padding:40px;color:#EF4444;">Not Connected with server</div>';
       }
     }
 
-   async function loadStats() {
-      try {
-        const res  = await fetch('https://api.leadspro.tech/api/leads/stats', { 
-          headers:{'Authorization':`Bearer ${token}`} 
-        });
+    async function loadStats(){
+      try{
+        const res = await fetch('https://api.leadspro.tech/api/leads/stats',{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
-        if (data && data.success && data.stats) {
-          document.getElementById('statTotal').textContent     = data.stats.total ?? 0;
-          document.getElementById('statNew').textContent       = (data.stats.total - data.stats.converted) ?? 0;
-          document.getElementById('statFollowUp').textContent  = data.stats.followups ?? 0;
-          document.getElementById('statConverted').textContent = data.stats.converted ?? 0;
+        if(data&&data.success&&data.stats){
+          document.getElementById('statTotal').textContent     = data.stats.total??0;
+          document.getElementById('statNew').textContent       = (data.stats.total-data.stats.converted)??0;
+          document.getElementById('statFollowUp').textContent  = data.stats.followups??0;
+          document.getElementById('statConverted').textContent = data.stats.converted??0;
           return;
         }
-      } catch(e) {
-        console.log("Backend stats fetch failed, switching to client-side count...", e);
-      }
-
-      // 🚀 BACKUP LOGIC: Agar server se stats nahi aaye, toh local data se ginke dikhao!
-      if (typeof allLeadsData !== 'undefined' && allLeadsData.length > 0) {
-        const total = allLeadsData.length;
-        const converted = allLeadsData.filter(l => l.status === 'Converted').length;
-        const followups = allLeadsData.filter(l => l.status === 'Follow Up').length;
-        
-        document.getElementById('statTotal').textContent     = total;
-        document.getElementById('statNew').textContent       = total - converted;
-        document.getElementById('statFollowUp').textContent  = followups;
-        document.getElementById('statConverted').textContent = converted;
-      } else {
-        // Agar bilkul data nahi hai toh zero dikhao, blank '--' mat chodo
-        document.getElementById('statTotal').textContent     = "0";
-        document.getElementById('statNew').textContent       = "0";
-        document.getElementById('statFollowUp').textContent  = "0";
-        document.getElementById('statConverted').textContent = "0";
+      }catch(e){}
+      if(allLeadsData.length>0){
+        const total=allLeadsData.length;
+        const converted=allLeadsData.filter(l=>l.status==='Converted').length;
+        const followups=allLeadsData.filter(l=>l.status==='Follow Up').length;
+        document.getElementById('statTotal').textContent=total;
+        document.getElementById('statNew').textContent=total-converted;
+        document.getElementById('statFollowUp').textContent=followups;
+        document.getElementById('statConverted').textContent=converted;
       }
     }
-    
 
-    function renderPagination(p) {
+    function renderPagination(p){
       let html='';
       for(let i=1;i<=p.pages;i++) html+=`<button onclick="goToPage(${i})" style="width:30px;height:30px;border-radius:7px;border:none;font-size:12px;font-weight:600;cursor:pointer;${i===p.page?'background:#4F46E5;color:white;':'background:#F3F4F6;color:#374151;'}">${i}</button>`;
       document.getElementById('pagination').innerHTML=html;
@@ -464,53 +588,54 @@
 
     function goToPage(p){currentPage=p;loadLeads();}
 
-    function setStatusFilter(v, btn) {
-      currentStatus=v; currentPage=1;
-      document.querySelectorAll('.filter-chip').forEach(c=>{
-        if(c.onclick && c.onclick.toString().includes('setStatusFilter')) c.classList.remove('active');
-      });
-      btn.classList.add('active');
-      loadLeads();
+    function setStatusFilter(v,btn){
+      currentStatus=v;currentPage=1;
+      document.querySelectorAll('.filter-chip').forEach(c=>{if(c.onclick&&c.onclick.toString().includes('setStatusFilter'))c.classList.remove('active');});
+      btn.classList.add('active');loadLeads();
     }
 
-    function setSourceFilter(v, btn) {
-      currentSource=v; currentPage=1;
-      document.querySelectorAll('.filter-chip').forEach(c=>{
-        if(c.onclick && c.onclick.toString().includes('setSourceFilter')) c.classList.remove('active');
-      });
-      btn.classList.add('active');
-      loadLeads();
+    function setSourceFilter(v,btn){
+      currentSource=v;currentPage=1;
+      document.querySelectorAll('.filter-chip').forEach(c=>{if(c.onclick&&c.onclick.toString().includes('setSourceFilter'))c.classList.remove('active');});
+      btn.classList.add('active');loadLeads();
     }
 
     let st; function searchLeads(v){clearTimeout(st);st=setTimeout(()=>{currentSearch=v;currentPage=1;loadLeads();},400);}
 
-    function openWhatsApp(phone, name) {
-      const msg = encodeURIComponent(`Hi ${name}! 👋 LeadsPro is reaching out to you`);
-      window.open(`https://wa.me/91${phone}?text=${msg}`, '_blank');
+    function openWhatsApp(phone,name){
+      const msg=encodeURIComponent(`Hi ${name}! 👋 LeadsPro is reaching out to you`);
+      window.open(`https://wa.me/91${phone}?text=${msg}`,'_blank');
     }
 
-    // Follow Up Modal
-    function openFollowUpModal(leadId, leadName) {
-      const date = prompt(`Set FollowUp Date  ${leadName} (YYYY-MM-DD):`, new Date().toISOString().split('T')[0]);
-      if (!date) return;
-      const notes = prompt('Notes (optional):') || '';
-      addFollowUp(leadId, date, notes);
+    function openFollowUpModal(leadId,leadName){
+      const date=prompt(`Set FollowUp Date for ${leadName} (YYYY-MM-DD):`,new Date().toISOString().split('T')[0]);
+      if(!date)return;
+      const notes=prompt('Notes (optional):')||'';
+      addFollowUp(leadId,date,notes);
     }
 
-    async function addFollowUp(lead_id, follow_up_date, notes) {
-      try {
-        const res  = await fetch('https://api.leadspro.tech/api/followups', { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body:JSON.stringify({lead_id, follow_up_date, notes}) });
-        const data = await res.json();
-        if (data.success) showToast('✅ Follow up scheduled!', 'ok');
-        else showToast('❌ ' + data.message, 'err');
-      } catch(e) { showToast('❌ Server error', 'err'); }
+    async function addFollowUp(lead_id,follow_up_date,notes){
+      try{
+        const res=await fetch('https://api.leadspro.tech/api/followups',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,follow_up_date,notes})});
+        const data=await res.json();
+        if(data.success)showToast('✅ Follow up scheduled!','ok');
+        else showToast('❌ '+data.message,'err');
+      }catch(e){showToast('❌ Server error','err');}
     }
 
-    // Add/Edit Modal
-    function openAddModal(){editId=null;document.getElementById('modalTitle').textContent='Add New Lead';['f_name','f_phone','f_email','f_notes'].forEach(id=>document.getElementById(id).value='');document.getElementById('f_source').value='Facebook Ads';document.getElementById('f_status').value='New';document.getElementById('f_priority').value='normal';document.getElementById('modal').style.display='flex';}
+    function openAddModal(){
+      editId=null;
+      document.getElementById('modalTitle').textContent='Add New Lead';
+      ['f_name','f_phone','f_email','f_notes'].forEach(id=>document.getElementById(id).value='');
+      document.getElementById('f_source').value='Facebook Ads';
+      document.getElementById('f_status').value='New';
+      document.getElementById('f_priority').value='normal';
+      document.getElementById('f_assigned').value='';
+      document.getElementById('modal').style.display='flex';
+    }
 
     function openEditModal(l){
-      if(typeof l === 'string') l = JSON.parse(l);
+      if(typeof l==='string') l=JSON.parse(l);
       editId=l.id;
       document.getElementById('modalTitle').textContent='Edit Lead';
       document.getElementById('f_name').value=l.name;
@@ -520,68 +645,71 @@
       document.getElementById('f_status').value=l.status;
       document.getElementById('f_priority').value=l.priority||'normal';
       document.getElementById('f_notes').value=l.notes||'';
+      document.getElementById('f_assigned').value=l.assigned_to||'';
       document.getElementById('modal').style.display='flex';
     }
 
     function closeModal(){document.getElementById('modal').style.display='none';}
 
     async function saveLead(){
-      const body={name:document.getElementById('f_name').value.trim(),phone:document.getElementById('f_phone').value.trim(),email:document.getElementById('f_email').value.trim(),source:document.getElementById('f_source').value,status:document.getElementById('f_status').value,priority:document.getElementById('f_priority').value,notes:document.getElementById('f_notes').value.trim()};
+      const body={
+        name:document.getElementById('f_name').value.trim(),
+        phone:document.getElementById('f_phone').value.trim(),
+        email:document.getElementById('f_email').value.trim(),
+        source:document.getElementById('f_source').value,
+        status:document.getElementById('f_status').value,
+        priority:document.getElementById('f_priority').value,
+        notes:document.getElementById('f_notes').value.trim(),
+        assigned_to:document.getElementById('f_assigned').value||null
+      };
       if(!body.name||!body.phone){showToast('⚠️ Name and phone required!','err');return;}
-     try {
-  const res = await fetch(
-    editId
-      ? `https://api.leadspro.tech/api/leads/${editId}`
-      : 'https://api.leadspro.tech/api/leads',
-    {
-      method: editId ? 'PUT' : 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${token}`
-      },
-      body: JSON.stringify(body)
-    }
-  );
-
-  const data = await res.json();
-
-  if (data.success) {
-    showToast('✅ ' + data.message, 'ok');
-    closeModal();
-    loadLeads();
-  } else {
-    showToast('❌ ' + data.message, 'err');
-  }
-} catch (e) {
-  showToast('❌ Server error', 'err');
-}
+      try{
+        const res=await fetch(
+          editId?`https://api.leadspro.tech/api/leads/${editId}`:'https://api.leadspro.tech/api/leads',
+          {method:editId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(body)}
+        );
+        const data=await res.json();
+        if(data.success){showToast('✅ '+data.message,'ok');closeModal();loadLeads();}
+        else showToast('❌ '+data.message,'err');
+      }catch(e){showToast('❌ Server error','err');}
     }
 
     async function deleteLead(id){
-      if(!confirm('Do you really want to delete?'))return;
-      try{const res=await fetch(`https://api.leadspro.tech/api/leads/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadLeads();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+      if(!confirm('Delete this lead?'))return;
+      try{
+        const res=await fetch(`https://api.leadspro.tech/api/leads/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
+        const data=await res.json();
+        if(data.success){showToast('✅ Deleted!','ok');loadLeads();}
+        else showToast('❌ '+data.message,'err');
+      }catch(e){showToast('❌ Server error','err');}
     }
 
-    // Export
     async function exportToExcel(){
       showToast('📥 Exporting...','info');
-      try{const res=await fetch('https://api.leadspro.tech/api/leads?limit=10000',{headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(!data.success||!data.data.length){showToast('⚠️ No Leads Founded!','err');return;}
-      const exportData=data.data.map((l,i)=>({'Sr':i+1,'Name':l.name,'Phone':l.phone,'Email':l.email||'','Source':l.source,'Status':l.status,'Priority':l.priority||'normal','Notes':l.notes||'','Date':new Date(l.created_at).toLocaleDateString('en-IN')}));
-      const ws=XLSX.utils.json_to_sheet(exportData);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads');XLSX.writeFile(wb,`LeadsPro_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.xlsx`);showToast(`✅ Exported!`,'ok');}catch(e){showToast('❌ Export failed','err');}
+      try{
+        const res=await fetch('https://api.leadspro.tech/api/leads?limit=10000',{headers:{'Authorization':`Bearer ${token}`}});
+        const data=await res.json();
+        if(!data.success||!data.data.length){showToast('⚠️ No Leads Found!','err');return;}
+        const exportData=data.data.map((l,i)=>({'Sr':i+1,'Name':l.name,'Phone':l.phone,'Email':l.email||'','Source':l.source,'Status':l.status,'Priority':l.priority||'normal','Assigned To':l.assigned_name||'Unassigned','Notes':l.notes||'','Date':new Date(l.created_at).toLocaleDateString('en-IN')}));
+        const ws=XLSX.utils.json_to_sheet(exportData);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Leads');
+        XLSX.writeFile(wb,`LeadsPro_${new Date().toLocaleDateString('en-IN').replace(/\//g,'-')}.xlsx`);
+        showToast('✅ Exported!','ok');
+      }catch(e){showToast('❌ Export failed','err');}
     }
 
-    // Import
     function openImportModal(){importData=[];document.getElementById('importPreview').style.display='none';document.getElementById('fileInput').value='';document.getElementById('importBtn').disabled=true;document.getElementById('importBtn').style.opacity='0.5';document.getElementById('importModal').style.display='flex';}
     function closeImportModal(){document.getElementById('importModal').style.display='none';}
     function downloadTemplate(){const d=[{'Name':'Rahul Sharma','Phone':'9876543210','Email':'rahul@gmail.com','Source':'Facebook Ads','Status':'New','Notes':''}];const ws=XLSX.utils.json_to_sheet(d);const wb=XLSX.utils.book_new();XLSX.utils.book_append_sheet(wb,ws,'Template');XLSX.writeFile(wb,'LeadsPro_Template.xlsx');showToast('✅ Template downloaded!','ok');}
     function handleDrop(e){e.preventDefault();const f=e.dataTransfer.files[0];if(f)processFile(f);}
     function handleFileSelect(e){const f=e.target.files[0];if(f)processFile(f);}
-    function processFile(file){const r=new FileReader();r.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length){showToast('⚠️ This file contains no data!','err');return;}parseImportData(rows);}catch(err){showToast('❌ File read failed','err');}};r.readAsArrayBuffer(file);}
+    function processFile(file){const r=new FileReader();r.onload=e=>{try{const data=new Uint8Array(e.target.result);const wb=XLSX.read(data,{type:'array'});const rows=XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:''});if(!rows.length){showToast('⚠️ File mein data nahi hai!','err');return;}parseImportData(rows);}catch(err){showToast('❌ File read failed','err');}};r.readAsArrayBuffer(file);}
     const vSrc=['Facebook Ads','Instagram','Website','Referral','Others'];
     const vSts=['New','Contacted','Interested','Follow Up','Converted','Lost'];
     function parseImportData(rows){importData=[];let valid=0,invalid=0;rows.forEach(row=>{const name=(row['Name']||row['name']||'').toString().trim();const phone=(row['Phone']||row['phone']||'').toString().trim();const email=(row['Email']||row['email']||'').toString().trim();const source=(row['Source']||row['source']||'Others').toString().trim();const status=(row['Status']||row['status']||'New').toString().trim();const notes=(row['Notes']||row['notes']||'').toString().trim();const ok=name&&phone;const fs=vSrc.includes(source)?source:'Others';const fst=vSts.includes(status)?status:'New';if(ok){valid++;importData.push({name,phone,email,source:fs,status:fst,notes});}else invalid++;});document.getElementById('previewCount').textContent=rows.length;document.getElementById('validCount').textContent=valid;document.getElementById('invalidCount').textContent=invalid;document.getElementById('totalImportCount').textContent=rows.length;document.getElementById('importPreview').style.display='block';if(valid>0){document.getElementById('importBtn').disabled=false;document.getElementById('importBtn').style.opacity='1';document.getElementById('importBtn').style.cursor='pointer';}showToast(`✅ ${valid} valid leads!`,'ok');}
     async function importLeads(){if(!importData.length)return;const btn=document.getElementById('importBtn');btn.textContent='⏳ Importing...';btn.disabled=true;let ok=0,fail=0;for(const lead of importData){try{const res=await fetch('https://api.leadspro.tech/api/leads',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(lead)});const d=await res.json();if(d.success)ok++;else fail++;}catch(e){fail++;}}btn.textContent='📤 Import';btn.disabled=false;showToast(`✅ ${ok} imported!`,'ok');closeImportModal();loadLeads();}
 
+    // ── Init ──
+    loadUsers();
     loadLeads();
   </script>
 </body>

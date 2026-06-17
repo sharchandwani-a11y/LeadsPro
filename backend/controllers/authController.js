@@ -2,15 +2,29 @@ const db     = require('../config/db');
 const bcrypt = require('bcryptjs');
 const jwt    = require('jsonwebtoken');
 
+// ── Helper: Email Validation ──
+const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+const blockedDomains = ['mailinator.com','tempmail.com','guerrillamail.com','throwaway.email','yopmail.com','sharklasers.com','trashmail.com','fakeinbox.com','dispostable.com','maildrop.cc'];
+
+function isValidEmail(email) {
+  if (!emailRegex.test(email)) return false;
+  const domain = email.split('@')[1]?.toLowerCase();
+  if (blockedDomains.includes(domain)) return false;
+  return true;
+}
+
 exports.register = async (req, res) => {
   try {
     const { name, email, password, role } = req.body;
     if (!name || !email || !password)
       return res.status(400).json({ success: false, message: 'All Fields are Required' });
 
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address!' });
+
     const [existing] = await db.query('SELECT id FROM users WHERE email=?', [email]);
     if (existing.length > 0)
-      return res.status(409).json({ success: false, message: 'Email Already Registered ' });
+      return res.status(409).json({ success: false, message: 'Email Already Registered' });
 
     const hashed = await bcrypt.hash(password, 12);
     const [result] = await db.query(
@@ -39,7 +53,6 @@ exports.login = async (req, res) => {
     if (!isMatch)
       return res.status(401).json({ success: false, message: 'Wrong Email or Password' });
 
-    // 🚀 TOKEN FIX: Token ke andar 'admin_id' aur 'company_id' dono bhej rahe hain taaki login ke baad leads fetch ho sakein
     const token = jwt.sign(
       { 
         id: user.id, 
@@ -90,6 +103,10 @@ exports.updateProfile = async (req, res) => {
     const { name, email } = req.body;
     if (!name || !email)
       return res.status(400).json({ success: false, message: 'Name and Email Required' });
+
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address!' });
+
     await db.query('UPDATE users SET name=?, email=? WHERE id=?', [name, email, req.user.id]);
     res.json({ success: true, message: 'Profile Updated!' });
   } catch (err) {
@@ -119,7 +136,6 @@ exports.changePassword = async (req, res) => {
   }
 };
 
-// 📋 GET ALL USERS: Admin ko sirf uski company ke hi employees dikhne chahiye, poore database ke nahi
 exports.getAllUsers = async (req, res) => {
   try {
     const isAdmin = req.user.role === 'admin';
@@ -135,7 +151,6 @@ exports.getAllUsers = async (req, res) => {
   }
 };
 
-// 👥 CREATE EMPLOYEE: Jab Admin employee banaye toh admin_id aur company_id map ho jaye
 exports.createEmployee = async (req, res) => {
   try {
     if (req.user.role !== 'admin')
@@ -145,15 +160,16 @@ exports.createEmployee = async (req, res) => {
     if (!name || !email || !password)
       return res.status(400).json({ success: false, message: 'Name, Email and Password Required' });
 
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address!' });
+
     const [existing] = await db.query('SELECT id FROM users WHERE email=?', [email]);
     if (existing.length > 0)
       return res.status(409).json({ success: false, message: 'Email Already Registered' });
 
     const hashed = await bcrypt.hash(password, 12);
-    
-    // Admin ki company_id nikalna agar token me na ho
     const companyId = req.user.company_id || null;
-    const adminId = req.user.id; // Logged-in Admin ki ID
+    const adminId = req.user.id;
 
     const [result] = await db.query(
       'INSERT INTO users (name, email, password, role, created_by, admin_id, company_id) VALUES (?,?,?,?,?,?,?)',
@@ -206,20 +222,34 @@ exports.deleteUser = async (req, res) => {
   }
 };
 
-// 🌐 SIGNUP: Naya Admin signup karega toh uski data pipeline strict separate banegi
 exports.signup = async (req, res) => {
   try {
     const { company_name, email, phone, industry, password, plan } = req.body;
 
+    // ── Required fields check ──
     if (!company_name || !email || !password)
-      return res.status(400).json({ success: false, message: 'Sab fields required hain' });
+      return res.status(400).json({ success: false, message: 'Company name, email and password required!' });
 
-    const [existing] = await db.query('SELECT id FROM users WHERE email=?', [email]);
-    if (existing.length > 0)
-      return res.status(409).json({ success: false, message: 'Email already registered ' });
+    // ── Email format validation ──
+    if (!isValidEmail(email))
+      return res.status(400).json({ success: false, message: 'Please enter a valid email address!' });
+
+    // ── Password strength check ──
+    if (password.length < 8)
+      return res.status(400).json({ success: false, message: 'Password must be at least 8 characters!' });
+
+    // ── Check users table ──
+    const [existingUser] = await db.query('SELECT id FROM users WHERE email=?', [email]);
+    if (existingUser.length > 0)
+      return res.status(409).json({ success: false, message: 'Email already registered! Please login.' });
+
+    // ── Check companies table ──
+    const [existingCompany] = await db.query('SELECT id FROM companies WHERE email=?', [email]);
+    if (existingCompany.length > 0)
+      return res.status(409).json({ success: false, message: 'Email already registered! Please login.' });
 
     const planExpiry = new Date();
-    planExpiry.setDate(planExpiry.getDate() + 14); 
+    planExpiry.setDate(planExpiry.getDate() + 14);
 
     const [company] = await db.query(
       'INSERT INTO companies (company_name, email, phone, plan, plan_expiry) VALUES (?,?,?,?,?)',
@@ -227,8 +257,7 @@ exports.signup = async (req, res) => {
     );
 
     const hashed = await bcrypt.hash(password, 12);
-    
-    // Naya Admin banate waqt iska 'admin_id' NULL ya iski apni future ID banti h, login par automatic setup handle ho jayega
+
     const [user] = await db.query(
       'INSERT INTO users (name, email, password, role, company_id, admin_id) VALUES (?,?,?,?,?,NULL)',
       [company_name + ' Admin', email, hashed, 'admin', company.insertId]
@@ -236,7 +265,6 @@ exports.signup = async (req, res) => {
 
     const adminUserId = user.insertId;
 
-    // Token configuration
     const token = jwt.sign(
       { id: adminUserId, email, role: 'admin', company_id: company.insertId, admin_id: adminUserId },
       process.env.JWT_SECRET || 'leadspro_secret_key_2024',
@@ -245,9 +273,16 @@ exports.signup = async (req, res) => {
 
     res.status(201).json({
       success: true,
-      message: 'Account Created!',
+      message: 'Account Created Successfully!',
       token,
-      user: { id: adminUserId, name: company_name + ' Admin', email, role: 'admin', company_id: company.insertId, admin_id: adminUserId }
+      user: { 
+        id: adminUserId, 
+        name: company_name + ' Admin', 
+        email, 
+        role: 'admin', 
+        company_id: company.insertId, 
+        admin_id: adminUserId 
+      }
     });
   } catch (err) {
     console.error(err);
