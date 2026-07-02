@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Follow Ups</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght=400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="sidebar.js"></script>
@@ -199,7 +200,7 @@
     // ===== OPEN ADD MODAL (Loads dynamic leads inside dropdown) =====
     async function openAddModal() {
       try {
-        const res = await fetch('https://api.leadspro.tech/api/leads?limit=100', { headers:{ 'Authorization':`Bearer ${token}` } });
+        const res = await fetch(`${API}/api/leads?limit=100`, { headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success && data.data) {
           const sel = document.getElementById('fu_lead');
@@ -334,7 +335,7 @@
     // ===== LOAD DATA =====
     async function loadFollowUps() {
       try {
-        const res  = await fetch('https://api.leadspro.tech/api/followups', { headers:{ 'Authorization':`Bearer ${token}` } });
+        const res = await fetch(`${API}/api/followups`, { headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) {
           allFollowUps = data.data;
@@ -411,7 +412,7 @@
       const newDate = prompt('Enter new date (YYYY-MM-DD):', new Date().toISOString().split('T')[0]);
       if (!newDate) return;
       try {
-        const res  = await fetch(`https://api.leadspro.tech/api/followups/${id}/reschedule`, {
+       const res = await fetch(`${API}/api/followups/${id}/reschedule`, {
           method: 'PUT',
           headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
           body: JSON.stringify({ follow_up_date: newDate })
@@ -425,7 +426,7 @@
     // ===== MARK DONE =====
     async function markDone(id) {
       try {
-        const res  = await fetch(`https://api.leadspro.tech/api/followups/${id}/done`, { method:'PUT', headers:{ 'Authorization':`Bearer ${token}` } });
+        const res = await fetch(`${API}/api/followups/${id}/done`,{ method:'PUT', headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) { showToast('✅ Done!', 'ok'); loadFollowUps(); }
       } catch(e) { showToast('❌ Server error', 'err'); }
@@ -435,7 +436,7 @@
     async function deleteFollowUp(id) {
       if (!confirm('Do you want to Delete?')) return;
       try {
-        const res  = await fetch(`https://api.leadspro.tech/api/followups/${id}`, { method:'DELETE', headers:{ 'Authorization':`Bearer ${token}` } });
+        const res = await fetch(`${API}/api/followups/${id}`, { method:'DELETE', headers:{ 'Authorization':`Bearer ${token}` } });
         const data = await res.json();
         if (data.success) { showToast('✅ Deleted!', 'ok'); loadFollowUps(); }
       } catch(e) { showToast('❌ Server error', 'err'); }
@@ -452,7 +453,7 @@
       if (!lead_id || !follow_up_date) { showToast('⚠️ Lead ID and date required!', 'err'); return; }
 
       try {
-        const res  = await fetch('https://api.leadspro.tech/api/followups', {
+        const res = await fetch(`${API}/api/followups`,{
           method: 'POST',
           headers: { 'Content-Type':'application/json', 'Authorization':`Bearer ${token}` },
           body: JSON.stringify({ lead_id, follow_up_date, follow_up_time, fu_type, notes })

@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Notifications</title>
+  <script src="config.js"></script>
+  <link rel="icon" type="image/png" href="logosrbg.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="sidebar.js"></script>
+  <style>
+    .notif-card {
+      background: white;
+      border-radius: 14px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 6px rgba(0,0,0,0.06);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: flex-start;
+      gap: 14px;
+      cursor: pointer;
+      transition: box-shadow 0.2s;
+      border-left: 4px solid #E5E7EB;
+      position: relative;
+    }
+    .notif-card:hover { box-shadow: 0 4px 16px rgba(0,0,0,0.1); }
+    .notif-card.unread { background: #FAFAFF; border-left-color: #6C3EF4; }
+    .notif-card.type-task     { border-left-color: #F59E0B; }
+    .notif-card.type-followup { border-left-color: #0EA5E9; }
+    .notif-card.type-meeting  { border-left-color: #8B5CF6; }
+    .notif-card.type-payment  { border-left-color: #10B981; }
+    .notif-card.type-domain   { border-left-color: #EF4444; }
+    .notif-card.type-general  { border-left-color: #6B7280; }
+    .notif-card.unread.type-task     { background: #FFFBEB; }
+    .notif-card.unread.type-followup { background: #F0F9FF; }
+    .notif-card.unread.type-meeting  { background: #F5F3FF; }
+    .notif-card.unread.type-payment  { background: #ECFDF5; }
+    .notif-card.unread.type-domain   { background: #FFF1F2; }
+    .unread-dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: #6C3EF4; flex-shrink: 0; margin-top: 6px;
+    }
+    .notif-icon {
+      width: 42px; height: 42px; border-radius: 12px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 20px; flex-shrink: 0;
+    }
+    .filter-btn {
+      padding: 7px 16px; border-radius: 20px; font-size: 12px;
+      font-weight: 600; cursor: pointer; border: 1.5px solid #E5E7EB;
+      background: white; color: #6B7280; transition: all 0.2s; white-space: nowrap;
+    }
+    .filter-btn.active { background: #6C3EF4; border-color: #6C3EF4; color: white; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+ 
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-col">
+      <div id="headerContainer"></div>
+      <div class="main-scroll">
+ 
+        <!-- Welcome Bar -->
+        <div style="background:linear-gradient(135deg,#ede9fe,#fce7f3);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 style="font-size:20px;font-weight:800;color:#1e1b4b;">Notifications 🔔</h1>
+            <p style="color:#6B7280;font-size:13px;margin-top:3px;">Stay updated with tasks, followups, meetings and payments.</p>
+          </div>
+          <div style="display:flex;gap:10px;">
+            <button onclick="markAllRead()" style="background:white;color:#6C3EF4;border:1.5px solid #6C3EF4;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;">✓ Mark All Read</button>
+            <button onclick="clearRead()" style="background:#6C3EF4;color:white;border:none;padding:9px 16px;border-radius:10px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(108,62,244,0.3);">🗑️ Clear Read</button>
+          </div>
+        </div>
+ 
+        <!-- Stats Row -->
+        <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+          <div style="background:white;border-radius:14px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="font-size:12px;color:#6B7280;font-weight:600;margin-bottom:6px;">Total</div>
+            <div id="statTotal" style="font-size:28px;font-weight:800;color:#111827;">—</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="font-size:12px;color:#6B7280;font-weight:600;margin-bottom:6px;">Unread</div>
+            <div id="statUnread" style="font-size:28px;font-weight:800;color:#6C3EF4;">—</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="font-size:12px;color:#6B7280;font-weight:600;margin-bottom:6px;">Tasks & Followups</div>
+            <div id="statUrgent" style="font-size:28px;font-weight:800;color:#F59E0B;">—</div>
+          </div>
+          <div style="background:white;border-radius:14px;padding:16px 18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);">
+            <div style="font-size:12px;color:#6B7280;font-weight:600;margin-bottom:6px;">Payments</div>
+            <div id="statPayments" style="font-size:28px;font-weight:800;color:#10B981;">—</div>
+          </div>
+        </div>
+ 
+        <!-- Filter Bar -->
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;overflow-x:auto;">
+          <button class="filter-btn active" onclick="filterNotifs('all', this)">All</button>
+          <button class="filter-btn" onclick="filterNotifs('unread', this)">🔵 Unread</button>
+          <button class="filter-btn" onclick="filterNotifs('task', this)">⚠️ Tasks</button>
+          <button class="filter-btn" onclick="filterNotifs('followup', this)">📞 Follow Ups</button>
+          <button class="filter-btn" onclick="filterNotifs('meeting', this)">📅 Meetings</button>
+          <button class="filter-btn" onclick="filterNotifs('payment', this)">💰 Payments</button>
+          <button class="filter-btn" onclick="filterNotifs('domain', this)">🌐 Domain</button>
+        </div>
+ 
+        <!-- Notifications List -->
+        <div id="notifList"></div>
+ 
+      </div>
+    </div>
+  </div>
+ 
+  <div style="position:fixed;bottom:20px;right:30px;z-index:60;color:#7c3aed;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;">
+    Powered By <a href="https://vipprow.com/" target="_blank" rel="noopener noreferrer"><b>VIPPROW</b></a>
+  </div>
+ 
+  <script>
+    injectCommonStyles();
+    renderSidebar('Notifications');
+    document.getElementById('headerContainer').innerHTML = renderHeader('Notifications', '');
+ 
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+ 
+    let allNotifs = [];
+    let currentFilter = 'all';
+ 
+    const typeConfig = {
+      task:     { icon: '⚠️', bg: '#FEF3C7', label: 'Task' },
+      followup: { icon: '📞', bg: '#DBEAFE', label: 'Follow Up' },
+      meeting:  { icon: '📅', bg: '#EDE9FE', label: 'Meeting' },
+      payment:  { icon: '💰', bg: '#D1FAE5', label: 'Payment' },
+      domain:   { icon: '🌐', bg: '#FEE2E2', label: 'Domain' },
+      general:  { icon: '🔔', bg: '#F3F4F6', label: 'General' }
+    };
+ 
+    function timeAgo(dateStr) {
+      const diff = Date.now() - new Date(dateStr).getTime();
+      const mins  = Math.floor(diff / 60000);
+      const hours = Math.floor(diff / 3600000);
+      const days  = Math.floor(diff / 86400000);
+      if (mins < 1)   return 'Just now';
+      if (mins < 60)  return `${mins}m ago`;
+      if (hours < 24) return `${hours}h ago`;
+      return `${days}d ago`;
+    }
+ 
+    // ── Load Notifications ──
+    async function loadNotifications() {
+      try {
+        const res  = await fetch(`${API}/api/notifications`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.success) {
+          allNotifs = data.data;
+          updateStats();
+          renderNotifs();
+        }
+      } catch (e) { console.error(e); }
+    }
+ 
+    // ── Update Stats ──
+    function updateStats() {
+      const total    = allNotifs.length;
+      const unread   = allNotifs.filter(n => !n.is_read).length;
+      const urgent   = allNotifs.filter(n => n.type === 'task' || n.type === 'followup').length;
+      const payments = allNotifs.filter(n => n.type === 'payment').length;
+ 
+      document.getElementById('statTotal').textContent    = total;
+      document.getElementById('statUnread').textContent   = unread;
+      document.getElementById('statUrgent').textContent   = urgent;
+      document.getElementById('statPayments').textContent = payments;
+    }
+ 
+    // ── Filter ──
+    function filterNotifs(f, btn) {
+      currentFilter = f;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderNotifs();
+    }
+ 
+    // ── Render ──
+    function renderNotifs() {
+      let visible = [...allNotifs];
+ 
+      if (currentFilter === 'unread') visible = visible.filter(n => !n.is_read);
+      else if (currentFilter !== 'all') visible = visible.filter(n => n.type === currentFilter);
+ 
+      const list = document.getElementById('notifList');
+ 
+      if (!visible.length) {
+        list.innerHTML = `
+          <div style="text-align:center;padding:60px 20px;color:#9CA3AF;">
+            <div style="font-size:48px;margin-bottom:12px;">🔔</div>
+            <p style="font-weight:600;font-size:15px;color:#374151;">No notifications</p>
+            <p style="font-size:13px;margin-top:4px;">You're all caught up!</p>
+          </div>`;
+        return;
+      }
+ 
+      list.innerHTML = visible.map(n => {
+        const tc = typeConfig[n.type] || typeConfig.general;
+        return `
+          <div class="notif-card type-${n.type} ${!n.is_read ? 'unread' : ''}" onclick="handleClick(${n.id}, '${n.link || ''}')">
+            <div class="notif-icon" style="background:${tc.bg};">${tc.icon}</div>
+            <div style="flex:1;">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;flex-wrap:wrap;">
+                <span style="font-size:14px;font-weight:700;color:#111827;">${n.title}</span>
+                <span style="font-size:10px;font-weight:600;padding:2px 8px;border-radius:20px;background:${tc.bg};color:#374151;">${tc.label}</span>
+                ${!n.is_read ? '<span style="width:8px;height:8px;border-radius:50%;background:#6C3EF4;display:inline-block;"></span>' : ''}
+              </div>
+              <p style="font-size:13px;color:#6B7280;margin:0 0 6px 0;line-height:1.5;">${n.message}</p>
+              <span style="font-size:11px;color:#9CA3AF;">${timeAgo(n.created_at)}</span>
+            </div>
+            <button onclick="event.stopPropagation();deleteNotif(${n.id})" style="background:none;border:none;color:#D1D5DB;cursor:pointer;font-size:16px;padding:4px;flex-shrink:0;" title="Delete">🗑️</button>
+          </div>
+        `;
+      }).join('');
+    }
+ 
+    // ── Handle Click ──
+    async function handleClick(id, link) {
+      await fetch(`${API}/api/notifications/${id}/read`, {
+        method: 'PUT',
+        headers: { 'Authorization': `Bearer ${token}` }
+      });
+      const notif = allNotifs.find(n => n.id === id);
+      if (notif) notif.is_read = 1;
+      updateStats();
+      renderNotifs();
+      updateBellCount();
+      if (link) window.location.href = link;
+    }
+ 
+    // ── Mark All Read ──
+    async function markAllRead() {
+      try {
+        await fetch(`${API}/api/notifications/mark-all/read`, {
+          method: 'PUT',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allNotifs.forEach(n => n.is_read = 1);
+        updateStats();
+        renderNotifs();
+        updateBellCount();
+        showToast('✅ All marked as read', 'ok');
+      } catch (e) { showToast('❌ Error', 'err'); }
+    }
+ 
+    // ── Clear Read ──
+    async function clearRead() {
+      if (!confirm('Delete all read notifications?')) return;
+      try {
+        await fetch(`${API}/api/notifications/clear/read`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        showToast('✅ Cleared!', 'ok');
+        loadNotifications();
+      } catch (e) { showToast('❌ Error', 'err'); }
+    }
+ 
+    // ── Delete Single ──
+    async function deleteNotif(id) {
+      try {
+        await fetch(`${API}/api/notifications/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        allNotifs = allNotifs.filter(n => n.id !== id);
+        updateStats();
+        renderNotifs();
+        updateBellCount();
+        showToast('✅ Deleted', 'ok');
+      } catch (e) { showToast('❌ Error', 'err'); }
+    }
+ 
+    // ── Bell Count Update ──
+    async function updateBellCount() {
+      try {
+        const res  = await fetch(`${API}/api/notifications/count`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const bell = document.getElementById('bellCount');
+        if (bell) {
+          bell.textContent = data.count || 0;
+          bell.style.display = data.count > 0 ? 'flex' : 'none';
+        }
+      } catch (e) {}
+    }
+ 
+    // ── Responsive ──
+    function fixGrid() {
+      const g = document.getElementById('statsGrid');
+      if (window.innerWidth < 640) g.style.gridTemplateColumns = 'repeat(2,1fr)';
+      else g.style.gridTemplateColumns = 'repeat(4,1fr)';
+    }
+    fixGrid();
+    window.addEventListener('resize', fixGrid);
+ 
+    // ── Init ──
+    loadNotifications();
+    updateBellCount();
+  </script>
+</body>
+</html>

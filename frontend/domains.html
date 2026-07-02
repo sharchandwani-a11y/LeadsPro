@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LeadsPro — Domains</title>
+  <script src="config.js"></script>
+  <link rel="icon" type="image/png" href="logosrbg.png"/>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
+  <script src="sidebar.js"></script>
+  <style>
+    .modal {
+      position: fixed; inset: 0; z-index: 999;
+      display: none; align-items: center; justify-content: center; padding: 16px;
+    }
+    .modal-overlay {
+      position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 1;
+    }
+    .modal-content {
+      position: relative; z-index: 2; background: white;
+      border-radius: 16px; width: 100%; max-width: 500px;
+      margin: 0 auto; max-height: 90vh; overflow-y: auto;
+    }
+    .expiry-badge {
+      padding: 3px 10px; border-radius: 20px;
+      font-size: 11px; font-weight: 600; white-space: nowrap;
+    }
+    .status-ok       { background: #D1FAE5; color: #065F46; }
+    .status-expiring { background: #FEF3C7; color: #92400E; }
+    .status-critical { background: #FEE2E2; color: #991B1B; }
+    .status-expired  { background: #F3F4F6; color: #6B7280; }
+    .status-na       { background: #F3F4F6; color: #9CA3AF; }
+  </style>
+</head>
+<body>
+  <div id="toast" class="toast"></div>
+  <div class="sidebar-overlay" id="overlay" onclick="closeSidebar()"></div>
+ 
+  <div class="app-wrapper">
+    <aside class="sidebar" id="sidebar"></aside>
+    <div class="main-col">
+      <div id="headerContainer"></div>
+      <div class="main-scroll">
+ 
+        <!-- Welcome Bar -->
+        <div style="background:linear-gradient(135deg,#ede9fe,#fce7f3);border-radius:16px;padding:20px 24px;display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;">
+          <div>
+            <h1 style="font-size:20px;font-weight:800;color:#1e1b4b;">Domain Tracker </h1>
+            <p style="color:#6B7280;font-size:13px;margin-top:3px;">Track domain, hosting & SSL expiry for all your clients.</p>
+          </div>
+          <button onclick="openAddModal()" style="background:#6C3EF4;color:white;border:none;padding:11px 20px;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 6px 20px rgba(108,62,244,0.35);">+ Add Domain</button>
+        </div>
+ 
+        <!-- Stat Cards -->
+        <div id="statsGrid" style="display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;">
+ 
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(108,62,244,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#EDE9FE;display:flex;align-items:center;justify-content:center;">
+                <svg width="19" height="19" fill="none" stroke="#7C3AED" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+              </div>
+              <span style="font-size:13px;color:#6B7280;font-weight:600;">Total</span>
+            </div>
+            <div id="statTotal" style="font-size:32px;font-weight:800;color:#111827;line-height:1;">—</div>
+            <div style="margin-top:8px;"><span style="background:#EDE9FE;color:#7C3AED;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">All Domains</span></div>
+          </div>
+ 
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(245,158,11,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#FEF3C7;display:flex;align-items:center;justify-content:center;">
+                <svg width="19" height="19" fill="none" stroke="#D97706" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+              </div>
+              <span style="font-size:13px;color:#6B7280;font-weight:600;">Expiring (30d)</span>
+            </div>
+            <div id="statExpiring" style="font-size:32px;font-weight:800;color:#D97706;line-height:1;">—</div>
+            <div style="margin-top:8px;"><span style="background:#FEF3C7;color:#92400E;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">Renew Soon</span></div>
+          </div>
+ 
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(239,68,68,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#FEE2E2;display:flex;align-items:center;justify-content:center;">
+                <svg width="19" height="19" fill="none" stroke="#EF4444" stroke-width="2" viewBox="0 0 24 24"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              </div>
+              <span style="font-size:13px;color:#6B7280;font-weight:600;">Critical (7d)</span>
+            </div>
+            <div id="statCritical" style="font-size:32px;font-weight:800;color:#EF4444;line-height:1;">—</div>
+            <div style="margin-top:8px;"><span style="background:#FEE2E2;color:#991B1B;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">⚠️ Urgent</span></div>
+          </div>
+ 
+          <div style="background:white;border-radius:14px;padding:18px;box-shadow:0 1px 6px rgba(0,0,0,0.06);transition:box-shadow 0.2s;" onmouseover="this.style.boxShadow='0 4px 16px rgba(107,114,128,0.12)'" onmouseout="this.style.boxShadow='0 1px 6px rgba(0,0,0,0.06)'">
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px;">
+              <div style="width:42px;height:42px;border-radius:12px;background:#F3F4F6;display:flex;align-items:center;justify-content:center;">
+                <svg width="19" height="19" fill="none" stroke="#6B7280" stroke-width="2" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+              </div>
+              <span style="font-size:13px;color:#6B7280;font-weight:600;">Expired</span>
+            </div>
+            <div id="statExpired" style="font-size:32px;font-weight:800;color:#6B7280;line-height:1;">—</div>
+            <div style="margin-top:8px;"><span style="background:#F3F4F6;color:#6B7280;font-size:11px;font-weight:600;padding:3px 10px;border-radius:20px;">Already Expired</span></div>
+          </div>
+ 
+        </div>
+ 
+        <!-- Search Bar -->
+        <div style="background:white;border-radius:14px;padding:16px;box-shadow:0 1px 6px rgba(0,0,0,0.06);margin-bottom:20px;">
+          <input type="text" id="searchInput" placeholder="Search by domain, client, registrar..." onkeyup="loadDomains()" style="width:100%;padding:10px 14px;border:1px solid #E5E7EB;border-radius:8px;font-size:13px;font-family:inherit;outline:none;">
+        </div>
+ 
+        <!-- Domains Table -->
+        <div style="background:white;border-radius:14px;box-shadow:0 1px 6px rgba(0,0,0,0.06);overflow:hidden;">
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:16px;border-bottom:1px solid #F3F4F6;">
+            <h2 style="font-weight:700;color:#111827;font-size:15px;">🌐 All Domains</h2>
+            <span id="domainCount" style="font-size:12px;color:#6B7280;font-weight:600;">0 domains</span>
+          </div>
+          <div style="overflow-x:auto;">
+            <table style="width:100%;border-collapse:collapse;min-width:700px;">
+              <thead style="background:#F9FAFB;">
+                <tr>
+                  <th style="text-align:left;padding:10px 16px;font-size:11px;color:#6B7280;font-weight:600;">DOMAIN</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">CLIENT</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">REGISTRAR</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;">DOMAIN EXP</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">HOSTING EXP</th>
+                  <th style="text-align:left;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;" class="hide-mobile">SSL EXP</th>
+                  <th style="text-align:center;padding:10px 12px;font-size:11px;color:#6B7280;font-weight:600;">ACTIONS</th>
+                </tr>
+              </thead>
+              <tbody id="domainsTableBody">
+                <tr><td colspan="7" style="text-align:center;padding:30px;color:#9CA3AF;">Loading...</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div id="pagination" style="padding:14px 16px;border-top:1px solid #F3F4F6;display:flex;justify-content:space-between;align-items:center;"></div>
+        </div>
+ 
+      </div>
+    </div>
+  </div>
+ 
+  <!-- Add/Edit Modal -->
+  <div id="domainModal" class="modal">
+    <div class="modal-overlay" onclick="closeModal()"></div>
+    <div class="modal-content">
+      <div style="padding:20px;border-bottom:1px solid #F3F4F6;">
+        <h2 id="modalTitle" style="font-weight:700;color:#111827;font-size:16px;">Add Domain</h2>
+      </div>
+      <div style="padding:20px;display:flex;flex-direction:column;gap:14px;">
+ 
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Domain Name *</label>
+          <input type="text" id="dName" class="inp" placeholder="e.g. example.com">
+        </div>
+ 
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;">
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Client</label>
+            <select id="dClient" class="inp" style="background:white;">
+              <option value="">Select Client</option>
+            </select>
+          </div>
+          <div>
+            <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Registrar</label>
+            <input type="text" id="dRegistrar" class="inp" placeholder="e.g. GoDaddy, Namecheap">
+          </div>
+        </div>
+ 
+        <div style="background:#F9FAFB;border-radius:10px;padding:14px;">
+          <p style="font-size:12px;font-weight:700;color:#374151;margin-bottom:12px;">📅 Expiry Dates</p>
+          <div style="display:flex;flex-direction:column;gap:10px;">
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">🌐 Domain Expiry</label>
+              <input type="date" id="dDomainExpiry" class="inp">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">🖥️ Hosting Expiry</label>
+              <input type="date" id="dHostingExpiry" class="inp">
+            </div>
+            <div>
+              <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">🔒 SSL Expiry</label>
+              <input type="date" id="dSslExpiry" class="inp">
+            </div>
+          </div>
+        </div>
+ 
+        <div>
+          <label style="display:block;font-size:12px;font-weight:600;color:#374151;margin-bottom:5px;">Notes</label>
+          <textarea id="dNotes" class="inp" style="resize:vertical;min-height:70px;" placeholder="Any additional notes..."></textarea>
+        </div>
+ 
+        <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:6px;">
+          <button onclick="closeModal()" style="background:#F3F4F6;color:#374151;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Cancel</button>
+          <button onclick="submitDomain()" style="background:#6C3EF4;color:white;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;">Save Domain</button>
+        </div>
+      </div>
+    </div>
+  </div>
+ 
+  <div style="position:fixed;bottom:20px;right:30px;z-index:60;color:#7c3aed;font-family:'Plus Jakarta Sans',sans-serif;font-size:13px;font-weight:600;">
+    Powered By <a href="https://vipprow.com/" target="_blank" rel="noopener noreferrer"><b>VIPPROW</b></a>
+  </div>
+ 
+  <script>
+    injectCommonStyles();
+    renderSidebar('Domains');
+    document.getElementById('headerContainer').innerHTML = renderHeader('Domain Tracker',
+      `<button onclick="openAddModal()" style="background:#6C3EF4;color:white;border:none;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:700;cursor:pointer;box-shadow:0 4px 12px rgba(108,62,244,0.3);">+ Add Domain</button>`
+    );
+ 
+    const token = localStorage.getItem('token');
+    if (!token) window.location.href = 'login.html';
+ 
+    let currentDomainId = null;
+ 
+    // ── Expiry Status ──
+    function getExpiryStatus(dateStr) {
+      if (!dateStr) return { label: 'N/A', cls: 'status-na' };
+      const today = new Date();
+      const exp   = new Date(dateStr);
+      const days  = Math.ceil((exp - today) / (1000 * 60 * 60 * 24));
+ 
+      if (days < 0)  return { label: 'Expired',            cls: 'status-expired' };
+      if (days <= 7) return { label: `${days}d ⚠️`,        cls: 'status-critical' };
+      if (days <= 30) return { label: `${days}d 🔔`,       cls: 'status-expiring' };
+      return { label: new Date(dateStr).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' }), cls: 'status-ok' };
+    }
+ 
+    // ── Load Stats ──
+    async function loadStats() {
+      try {
+        const res  = await fetch(`${API}/api/domains/stats`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('statTotal').textContent    = data.stats.total    || 0;
+          document.getElementById('statExpiring').textContent = data.stats.expiring  || 0;
+          document.getElementById('statCritical').textContent = data.stats.critical  || 0;
+          document.getElementById('statExpired').textContent  = data.stats.expired   || 0;
+        }
+      } catch (e) { console.error(e); }
+    }
+ 
+    // ── Load Clients ──
+    async function loadClients() {
+      try {
+        const res  = await fetch(`${API}/api/clients?limit=100`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const sel  = document.getElementById('dClient');
+        if (data.success) {
+          data.data.forEach(c => {
+            const opt = document.createElement('option');
+            opt.value = c.id; opt.textContent = c.name;
+            sel.appendChild(opt);
+          });
+        }
+      } catch (e) { console.error(e); }
+    }
+ 
+    // ── Load Domains ──
+    async function loadDomains(page = 1) {
+      const search = document.getElementById('searchInput').value;
+      let url = `${API}/api/domains?page=${page}&limit=10`;
+      if (search) url += `&search=${encodeURIComponent(search)}`;
+ 
+      try {
+        const res  = await fetch(url, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        const tbody = document.getElementById('domainsTableBody');
+ 
+        if (data.success && data.data.length > 0) {
+          tbody.innerHTML = data.data.map(d => {
+            const domainStatus  = getExpiryStatus(d.domain_expiry);
+            const hostingStatus = getExpiryStatus(d.hosting_expiry);
+            const sslStatus     = getExpiryStatus(d.ssl_expiry);
+ 
+            return `
+              <tr style="border-bottom:1px solid #F9FAFB;">
+                <td style="padding:12px 16px;">
+                  <div style="font-size:13px;font-weight:700;color:#111827;">🌐 ${d.domain_name}</div>
+                </td>
+                <td style="padding:12px;font-size:13px;color:#6B7280;" class="hide-mobile">${d.client_name || '—'}</td>
+                <td style="padding:12px;font-size:13px;color:#6B7280;" class="hide-mobile">${d.registrar || '—'}</td>
+                <td style="padding:12px;">
+                  <span class="expiry-badge ${domainStatus.cls}">${domainStatus.label}</span>
+                </td>
+                <td style="padding:12px;" class="hide-mobile">
+                  <span class="expiry-badge ${hostingStatus.cls}">${hostingStatus.label}</span>
+                </td>
+                <td style="padding:12px;" class="hide-mobile">
+                  <span class="expiry-badge ${sslStatus.cls}">${sslStatus.label}</span>
+                </td>
+                <td style="padding:12px;text-align:center;">
+                  <button onclick="editDomain(${d.id})" style="background:none;border:none;color:#6C3EF4;cursor:pointer;font-weight:600;font-size:12px;">Edit</button>
+                  <button onclick="deleteDomain(${d.id})" style="background:none;border:none;color:#EF4444;cursor:pointer;font-weight:600;font-size:12px;margin-left:8px;">Delete</button>
+                </td>
+              </tr>
+            `;
+          }).join('');
+ 
+          const total      = data.pagination?.total || 0;
+          const totalPages = data.pagination?.pages || 1;
+          document.getElementById('domainCount').textContent = `${total} domains`;
+ 
+          let paginationHTML = '';
+          if (totalPages > 1) {
+            if (page > 1) paginationHTML += `<button onclick="loadDomains(${page-1})" style="background:#F3F4F6;border:1px solid #E5E7EB;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">← Prev</button>`;
+            paginationHTML += `<span style="font-size:12px;color:#6B7280;">Page ${page} of ${totalPages}</span>`;
+            if (page < totalPages) paginationHTML += `<button onclick="loadDomains(${page+1})" style="background:#F3F4F6;border:1px solid #E5E7EB;padding:6px 12px;border-radius:6px;cursor:pointer;font-size:12px;">Next →</button>`;
+          }
+          document.getElementById('pagination').innerHTML = paginationHTML;
+        } else {
+          tbody.innerHTML = `
+            <tr><td colspan="7" style="text-align:center;padding:50px 20px;">
+              <div style="font-size:40px;margin-bottom:12px;">🌐</div>
+              <p style="font-weight:600;color:#374151;">No domains found</p>
+              <p style="font-size:13px;color:#9CA3AF;margin-top:4px;">Click "+ Add Domain" to get started</p>
+            </td></tr>`;
+          document.getElementById('pagination').innerHTML = '';
+          document.getElementById('domainCount').textContent = '0 domains';
+        }
+      } catch (e) {
+        document.getElementById('domainsTableBody').innerHTML = '<tr><td colspan="7" style="text-align:center;padding:30px;color:#EF4444;">Error loading domains</td></tr>';
+      }
+    }
+ 
+    // ── Open Add Modal ──
+    function openAddModal() {
+      currentDomainId = null;
+      document.getElementById('modalTitle').textContent = 'Add Domain';
+      document.getElementById('dName').value          = '';
+      document.getElementById('dClient').value        = '';
+      document.getElementById('dRegistrar').value     = '';
+      document.getElementById('dDomainExpiry').value  = '';
+      document.getElementById('dHostingExpiry').value = '';
+      document.getElementById('dSslExpiry').value     = '';
+      document.getElementById('dNotes').value         = '';
+      document.getElementById('domainModal').style.display = 'flex';
+    }
+ 
+    function closeModal() {
+      document.getElementById('domainModal').style.display = 'none';
+      currentDomainId = null;
+    }
+ 
+    // ── Edit Domain ──
+    async function editDomain(id) {
+      try {
+        const res  = await fetch(`${API}/api/domains/${id}`, { headers: { 'Authorization': `Bearer ${token}` } });
+        const data = await res.json();
+        if (!data.success) return;
+        const d = data.data;
+        currentDomainId = id;
+        document.getElementById('modalTitle').textContent      = 'Edit Domain';
+        document.getElementById('dName').value                 = d.domain_name;
+        document.getElementById('dClient').value               = d.client_id || '';
+        document.getElementById('dRegistrar').value            = d.registrar || '';
+        document.getElementById('dDomainExpiry').value         = d.domain_expiry  ? d.domain_expiry.split('T')[0]  : '';
+        document.getElementById('dHostingExpiry').value        = d.hosting_expiry ? d.hosting_expiry.split('T')[0] : '';
+        document.getElementById('dSslExpiry').value            = d.ssl_expiry     ? d.ssl_expiry.split('T')[0]     : '';
+        document.getElementById('dNotes').value                = d.notes || '';
+        document.getElementById('domainModal').style.display   = 'flex';
+      } catch (e) { showToast('❌ Error loading domain', 'err'); }
+    }
+ 
+    // ── Submit Domain ──
+    async function submitDomain() {
+      const name = document.getElementById('dName').value.trim();
+      if (!name) { showToast('❌ Domain name required', 'err'); return; }
+ 
+      const body = {
+        domain_name:     name,
+        client_id:       document.getElementById('dClient').value || null,
+        registrar:       document.getElementById('dRegistrar').value,
+        domain_expiry:   document.getElementById('dDomainExpiry').value  || null,
+        hosting_expiry:  document.getElementById('dHostingExpiry').value || null,
+        ssl_expiry:      document.getElementById('dSslExpiry').value     || null,
+        notes:           document.getElementById('dNotes').value
+      };
+ 
+      const method = currentDomainId ? 'PUT' : 'POST';
+      const url    = currentDomainId ? `${API}/api/domains/${currentDomainId}` : `${API}/api/domains`;
+ 
+      try {
+        const res  = await fetch(url, {
+          method,
+          headers: { 'Authorization': `Bearer ${token}`, 'Content-Type': 'application/json' },
+          body: JSON.stringify(body)
+        });
+        const data = await res.json();
+        if (data.success) {
+          showToast(currentDomainId ? '✅ Domain updated!' : '✅ Domain added!', 'ok');
+          closeModal();
+          loadDomains();
+          loadStats();
+        } else {
+          showToast('❌ ' + (data.message || 'Error'), 'err');
+        }
+      } catch (e) { showToast('❌ Server error', 'err'); }
+    }
+ 
+    // ── Delete Domain ──
+    async function deleteDomain(id) {
+      if (!confirm('Delete this domain?')) return;
+      try {
+        const res  = await fetch(`${API}/api/domains/${id}`, {
+          method: 'DELETE',
+          headers: { 'Authorization': `Bearer ${token}` }
+        });
+        const data = await res.json();
+        if (data.success) {
+          loadDomains();
+          loadStats();
+          showToast('✅ Domain deleted!', 'ok');
+        }
+      } catch (e) { showToast('❌ Error deleting domain', 'err'); }
+    }
+ 
+    // ── Responsive ──
+    function fixGrid() {
+      const g = document.getElementById('statsGrid');
+      if (window.innerWidth < 640) g.style.gridTemplateColumns = 'repeat(2,1fr)';
+      else if (window.innerWidth < 1024) g.style.gridTemplateColumns = 'repeat(2,1fr)';
+      else g.style.gridTemplateColumns = 'repeat(4,1fr)';
+    }
+    fixGrid();
+    window.addEventListener('resize', fixGrid);
+ 
+    // ── Init ──
+    loadStats();
+    loadClients();
+    loadDomains();
+  </script>
+</body>
+</html>

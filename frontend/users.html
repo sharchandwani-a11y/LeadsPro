@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Users</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/png" href="logo.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="sidebar.js"></script>
@@ -115,7 +116,7 @@
 
     async function loadUsers(){
       try{
-        const res=await fetch('https://api.leadspro.tech/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});
+        const res=await fetch(`${API}/api/auth/users` ,{headers:{'Authorization':`Bearer ${token}`}});
         const data=await res.json();
         if(data.success){
           const total=data.data.length;const active=data.data.filter(u=>u.is_active).length;
@@ -146,17 +147,17 @@
     async function createEmployee(){
       const name=document.getElementById('e_name').value.trim();const email=document.getElementById('e_email').value.trim();const password=document.getElementById('e_password').value;const role=document.getElementById('e_role').value;
       if(!name||!email||!password){showToast('⚠️ All fields are required!','err');return;}if(password.length<6){showToast('⚠️ Password min 6 characters!','err');return;}
-      try{const res=await fetch('https://api.leadspro.tech/api/auth/users/create',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({name,email,password,role})});const data=await res.json();if(data.success){showToast('✅ Employee added!','ok');closeAddModal();['e_name','e_email','e_password'].forEach(id=>document.getElementById(id).value='');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+      try{const res=await fetch(`${API}/api/auth/users/create`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({name,email,password,role})});const data=await res.json();if(data.success){showToast('✅ Employee added!','ok');closeAddModal();['e_name','e_email','e_password'].forEach(id=>document.getElementById(id).value='');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
     }
 
     async function toggleUser(id,cur){
       if(!confirm(`${cur?'Deactivate':'Activate'} karna chahte ho?`))return;
-      try{const res=await fetch(`https://api.leadspro.tech/api/auth/users/${id}/toggle`,{method:'PUT',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ '+data.message,'ok');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+      try{const res=await fetch(`${API}/api/auth/users/${id}/toggle`,{method:'PUT',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ '+data.message,'ok');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
     }
 
     async function deleteUser(id){
       if(!confirm(' Do you want to delete Permanently?'))return;
-      try{const res=await fetch(`https://api.leadspro.tech/api/auth/users/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
+      try{const res=await fetch(`${API}/api/auth/users/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});const data=await res.json();if(data.success){showToast('✅ Deleted!','ok');loadUsers();}else showToast('❌ '+data.message,'err');}catch(e){showToast('❌ Server error','err');}
     }
 
     loadUsers();

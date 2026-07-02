@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Login</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
@@ -71,7 +72,7 @@
       const password=document.getElementById('password').value;
       if(!email||!password){document.querySelector('.card').classList.add('shake');setTimeout(()=>document.querySelector('.card').classList.remove('shake'),300);showToast('⚠️ Enter Email and Password!','err');return;}
       try{
-        const res=await fetch('https://api.leadspro.tech/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
+        const res=await fetch(`${API}/api/auth/login`,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
         const data=await res.json();
         if(data.success){localStorage.setItem('token',data.token);localStorage.setItem('user',JSON.stringify(data.user));showToast('✅ Login successful!','ok');setTimeout(()=>window.location.href='dashboard.html',1000);}
         else{document.querySelector('.card').classList.add('shake');setTimeout(()=>document.querySelector('.card').classList.remove('shake'),300);showToast('❌ '+data.message,'err');}

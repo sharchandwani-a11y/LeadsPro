@@ -5,8 +5,13 @@ require('dotenv').config();
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: '*',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
+}));
 app.use(express.json());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Frontend static files serve karo
 
@@ -20,6 +25,11 @@ app.use('/api/leads',     require('./routes/leads'));
 app.use('/api/meetings',  require('./routes/meetings'));
 app.use('/api/followups', require('./routes/followups'));
 app.use('/api/clients', require('./routes/clients'));
+app.use('/api/tasks', require('./routes/tasks'));
+app.use('/api/projects', require('./routes/projects'));
+app.use('/api/revenue',  require('./routes/revenue'));
+app.use('/api/notifications', require('./routes/notifications'));
+app.use('/api/domains', require('./routes/domains'));
 
 // Root — login page pe redirect
 app.get('/', (req, res) => {

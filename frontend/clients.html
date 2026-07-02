@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Clients</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/png" href="logosrbg.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="sidebar.js"></script>
@@ -200,7 +201,7 @@
     const user  = JSON.parse(localStorage.getItem('user') || '{}');
     if (!token) window.location.href = 'login.html';
 
-    const API = (typeof CONFIG !== 'undefined' && CONFIG.API_URL) ? CONFIG.API_URL : 'https://api.leadspro.tech';
+    
 
     const avColors = ['#6C3EF4','#EC4899','#0EA5E9','#10B981','#F59E0B','#EF4444'];
     function getInitials(n){return(n||'?').split(' ').map(w=>w[0]).join('').toUpperCase().slice(0,2);}

@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Settings</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/png" href="logo.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="sidebar.js"></script>
@@ -131,7 +132,7 @@
     async function updateProfile(){
       const name=document.getElementById('p_name').value.trim();const email=document.getElementById('p_email').value.trim();
       if(!name||!email){showToast('⚠️ Name and email required!','err');return;}
-      try{const res=await fetch('https://api.leadspro.tech/api/auth/profile',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({name,email})});const data=await res.json();if(data.success){localStorage.setItem('user',JSON.stringify({...user,name,email}));showToast('✅ Profile update ho gaya!','ok');loadProfile();}else showToast('❌ '+data.message,'err');}
+    try{const res=await fetch(`${API}/api/auth/profile`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({name,email})});const data=await res.json();if(data.success){localStorage.setItem('user',JSON.stringify({...user,name,email}));showToast('✅ Profile update ho gaya!','ok');loadProfile();}else showToast('❌ '+data.message,'err');}
       catch(e){localStorage.setItem('user',JSON.stringify({...user,name,email}));showToast('✅ Profile updated Successfully!','ok');loadProfile();}
     }
 
@@ -140,7 +141,7 @@
       if(!oldPass){showToast('⚠️ Please enter your old password!','err');return;}
       if(newPass.length<6){showToast('⚠️ Min 6 characters!','err');return;}
       if(newPass!==confirmPass){showToast('⚠️ The entered passwords are not the same!','err');return;}
-      try{const res=await fetch('https://api.leadspro.tech/api/auth/change-password',{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({oldPassword:oldPass,newPassword:newPass})});const data=await res.json();if(data.success){showToast('✅ Password change ho gaya!','ok');setTimeout(()=>{localStorage.clear();window.location.href='login.html';},2000);}else showToast('❌ '+data.message,'err');}
+      try{const res=await fetch(`${API}/api/auth/change-password`,{method:'PUT',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({oldPassword:oldPass,newPassword:newPass})});const data=await res.json();if(data.success){showToast('✅ Password change ho gaya!','ok');setTimeout(()=>{localStorage.clear();window.location.href='login.html';},2000);}else showToast('❌ '+data.message,'err');}
       catch(e){showToast('❌ Server error','err');}
     }
 

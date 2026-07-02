@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Dashboard</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/png" href="logosrbg.png"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -225,9 +226,9 @@
     // ── Load Stats ──
     async function loadStats(){
       try{
-        const res = await fetch('https://api.leadspro.tech/api/leads?limit=1000',{headers:{'Authorization':`Bearer ${token}`}});
+        const res = await fetch(`${API}/api/leads?limit=1000`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
-        const resMeetings = await fetch('https://api.leadspro.tech/api/meetings',{headers:{'Authorization':`Bearer ${token}`}});
+        const resMeetings = await fetch(`${API}/api/meetings`,{headers:{'Authorization':`Bearer ${token}`}});
         const dataMeetings = await resMeetings.json();
 
         if(data.success && data.data){
@@ -254,7 +255,7 @@
     // ── Load Recent Leads ──
     async function loadLeads(){
       try{
-        const res = await fetch('https://api.leadspro.tech/api/leads?limit=5',{headers:{'Authorization':`Bearer ${token}`}});
+        const res = await fetch(`${API}/api/leads?limit=5`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
         const tbody = document.getElementById('leadsTableBody');
         if(data.success && data.data.length > 0){

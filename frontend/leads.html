@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Leads</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
@@ -321,7 +322,7 @@
     // ── Load Users for dropdowns ──
     async function loadUsers(){
       try{
-        const res = await fetch('https://api.leadspro.tech/api/auth/users',{headers:{'Authorization':`Bearer ${token}`}});
+        const res = await fetch(`${API}/api/auth/users`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
         if(data.success && data.data){
           allUsers = data.data;
@@ -383,7 +384,7 @@
           <div class="lead-status-bar">
             <div style="display:flex;align-items:center;gap:6px;">
               <div class="status-dot" style="background:${st.dot};"></div>
-              <span style="font-size:12px;font-weight:600;color:${st.color};">${l.notes||l.source}</span>
+             <span style="font-size:12px;font-weight:600;color:${st.color};">${l.source}</span>
               <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="background:none;border:none;cursor:pointer;padding:0;margin-left:4px;">
                 <svg width="13" height="13" fill="none" stroke="#9CA3AF" stroke-width="2" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
               </button>
@@ -430,9 +431,9 @@
                 <div class="detail-value">${l.assigned_name||'Unassigned'}</div>
               </div>
             </div>
-            ${l.notes?`<div style="margin-top:10px;background:#F9FAFB;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#9CA3AF;font-weight:600;margin-bottom:4px;">NOTES</div><div style="font-size:13px;color:#374151;">${l.notes}</div></div>`:''}
+           <div style="margin-top:10px;background:#F9FAFB;border-radius:8px;padding:10px;"><div style="font-size:10px;color:#9CA3AF;font-weight:600;margin-bottom:4px;">📝 NOTES</div><div style="font-size:13px;color:#374151;">${l.notes||'<span style="color:#9CA3AF;font-style:italic;">No notes added</span>'}</div></div>
             <div style="display:flex;gap:8px;margin-top:10px;">
-              <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="flex:1;background:#EEF2FF;color:#4F46E5;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">✏️ Edit</button>
+              <button onclick="openEditModal(${JSON.stringify(l).replace(/"/g,'&quot;')})" style="flex:1;background:#EEF2FF;color:#4F46E5;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;"> Edit</button>
               ${isAdmin?`<button onclick="openSingleAssign(${l.id},'${l.name}')" style="flex:1;background:#EDE9FE;color:#7C3AED;border:none;padding:9px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">👤 Assign</button>`:''}
               <button onclick="deleteLead(${l.id})" style="background:#FEE2E2;color:#EF4444;border:none;padding:9px 14px;border-radius:9px;font-size:13px;font-weight:600;cursor:pointer;">🗑️</button>
             </div>
@@ -496,7 +497,7 @@
 
       if(assignMode === 'single'){
         try{
-          const res = await fetch(`https://api.leadspro.tech/api/leads/${singleAssignId}/assign`,{
+          const res = await fetch(`${API}/api/leads/${singleAssignId}/assign`,{
             method:'PUT',
             headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
             body: JSON.stringify({assigned_to: userId})
@@ -513,7 +514,7 @@
 
       } else if(assignMode === 'bulk'){
         try{
-          const res = await fetch('https://api.leadspro.tech/api/leads/bulk-assign',{
+          const res = await fetch(`${API}/api/leads/bulk-assign`,{
             method:'POST',
             headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},
             body: JSON.stringify({lead_ids: Array.from(selectedLeads), assigned_to: userId})
@@ -538,7 +539,7 @@
       if(currentSource) params.append('source',currentSource);
       if(currentSearch) params.append('search',currentSearch);
       try{
-        const res = await fetch(`https://api.leadspro.tech/api/leads?${params}`,{headers:{'Authorization':`Bearer ${token}`}});
+        const res = await fetch(`${API}/api/leads?${params}`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
         const container = document.getElementById('leadsContainer');
         if(data.success){
@@ -559,7 +560,7 @@
 
     async function loadStats(){
       try{
-        const res = await fetch('https://api.leadspro.tech/api/leads/stats',{headers:{'Authorization':`Bearer ${token}`}});
+        const res = await fetch(`${API}/api/leads/stats`,{headers:{'Authorization':`Bearer ${token}`}});
         const data = await res.json();
         if(data&&data.success&&data.stats){
           document.getElementById('statTotal').textContent     = data.stats.total??0;
@@ -616,7 +617,7 @@
 
     async function addFollowUp(lead_id,follow_up_date,notes){
       try{
-        const res=await fetch('https://api.leadspro.tech/api/followups',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,follow_up_date,notes})});
+        const res=await fetch(`${API}/api/followups`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify({lead_id,follow_up_date,notes})});
         const data=await res.json();
         if(data.success)showToast('✅ Follow up scheduled!','ok');
         else showToast('❌ '+data.message,'err');
@@ -665,7 +666,7 @@
       if(!body.name||!body.phone){showToast('⚠️ Name and phone required!','err');return;}
       try{
         const res=await fetch(
-          editId?`https://api.leadspro.tech/api/leads/${editId}`:'https://api.leadspro.tech/api/leads',
+         editId?`${API}/api/leads/${editId}`:`${API}/api/leads`,
           {method:editId?'PUT':'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(body)}
         );
         const data=await res.json();
@@ -677,7 +678,7 @@
     async function deleteLead(id){
       if(!confirm('Delete this lead?'))return;
       try{
-        const res=await fetch(`https://api.leadspro.tech/api/leads/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
+        const res=await fetch(`${API}/api/leads/${id}`,{method:'DELETE',headers:{'Authorization':`Bearer ${token}`}});
         const data=await res.json();
         if(data.success){showToast('✅ Deleted!','ok');loadLeads();}
         else showToast('❌ '+data.message,'err');
@@ -687,7 +688,7 @@
     async function exportToExcel(){
       showToast('📥 Exporting...','info');
       try{
-        const res=await fetch('https://api.leadspro.tech/api/leads?limit=10000',{headers:{'Authorization':`Bearer ${token}`}});
+        const res=await fetch(`${API}/api/leads?limit=10000`,{headers:{'Authorization':`Bearer ${token}`}});
         const data=await res.json();
         if(!data.success||!data.data.length){showToast('⚠️ No Leads Found!','err');return;}
         const exportData=data.data.map((l,i)=>({'Sr':i+1,'Name':l.name,'Phone':l.phone,'Email':l.email||'','Source':l.source,'Status':l.status,'Priority':l.priority||'normal','Assigned To':l.assigned_name||'Unassigned','Notes':l.notes||'','Date':new Date(l.created_at).toLocaleDateString('en-IN')}));
@@ -706,7 +707,7 @@
     const vSrc=['Facebook Ads','Instagram','Website','Referral','Others'];
     const vSts=['New','Contacted','Interested','Follow Up','Converted','Lost'];
     function parseImportData(rows){importData=[];let valid=0,invalid=0;rows.forEach(row=>{const name=(row['Name']||row['name']||'').toString().trim();const phone=(row['Phone']||row['phone']||'').toString().trim();const email=(row['Email']||row['email']||'').toString().trim();const source=(row['Source']||row['source']||'Others').toString().trim();const status=(row['Status']||row['status']||'New').toString().trim();const notes=(row['Notes']||row['notes']||'').toString().trim();const ok=name&&phone;const fs=vSrc.includes(source)?source:'Others';const fst=vSts.includes(status)?status:'New';if(ok){valid++;importData.push({name,phone,email,source:fs,status:fst,notes});}else invalid++;});document.getElementById('previewCount').textContent=rows.length;document.getElementById('validCount').textContent=valid;document.getElementById('invalidCount').textContent=invalid;document.getElementById('totalImportCount').textContent=rows.length;document.getElementById('importPreview').style.display='block';if(valid>0){document.getElementById('importBtn').disabled=false;document.getElementById('importBtn').style.opacity='1';document.getElementById('importBtn').style.cursor='pointer';}showToast(`✅ ${valid} valid leads!`,'ok');}
-    async function importLeads(){if(!importData.length)return;const btn=document.getElementById('importBtn');btn.textContent='⏳ Importing...';btn.disabled=true;let ok=0,fail=0;for(const lead of importData){try{const res=await fetch('https://api.leadspro.tech/api/leads',{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(lead)});const d=await res.json();if(d.success)ok++;else fail++;}catch(e){fail++;}}btn.textContent='📤 Import';btn.disabled=false;showToast(`✅ ${ok} imported!`,'ok');closeImportModal();loadLeads();}
+    async function importLeads(){if(!importData.length)return;const btn=document.getElementById('importBtn');btn.textContent='⏳ Importing...';btn.disabled=true;let ok=0,fail=0;for(const lead of importData){try{const res=await fetch(`${API}/api/leads`,{method:'POST',headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`},body:JSON.stringify(lead)});const d=await res.json();if(d.success)ok++;else fail++;}catch(e){fail++;}}btn.textContent='📤 Import';btn.disabled=false;showToast(`✅ ${ok} imported!`,'ok');closeImportModal();loadLeads();}
 
     // ── Init ──
     loadUsers();

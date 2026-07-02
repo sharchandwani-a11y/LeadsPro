@@ -4,6 +4,7 @@
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>LeadsPro — Sign Up</title>
+   <script src="config.js"></script>
   <link rel="icon" type="image/jpeg" href="logo.jpeg"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet"/>
   <style>
@@ -243,7 +244,7 @@
       btn.disabled = true;
 
       try {
-        const res  = await fetch('https://api.leadspro.tech/api/auth/signup', {
+        const res = await fetch(`${API}/api/auth/signup`, {
           method:  'POST',
           headers: { 'Content-Type': 'application/json' },
           body:    JSON.stringify({ company_name, email, phone, industry, password, plan })
