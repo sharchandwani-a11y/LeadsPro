@@ -1,5 +1,5 @@
 const CONFIG = {
-  API_URL: 'http://localhost:5000'
+  API_URL: 'https://api.leadspro.tech'
 };
 
-const API = CONFIG.API_URL;  // ✅ YE ADD KARO
+const API = CONFIG.API_URL;
